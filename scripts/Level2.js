@@ -40,12 +40,12 @@ class Level2 extends Phaser.Scene {
         .setCollideWorldBounds(true)
         .setBounce(0.2)
         .setDrag(100)
-        .setGravityY(600).setScale(0.5);
+        .setGravityY(600).setScale(0.25);
   
       this.character.body.setSize(50, 50);
   
       this.character2 = this.physics.add
-        .sprite(100, 500, "character2")
+        .sprite(1200, 100, "character2")
         .setOrigin(0.5, 0.8)
         .setCollideWorldBounds(true)
         .setBounce(0.2)
