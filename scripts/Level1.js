@@ -4,10 +4,10 @@ class Level1 extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("tileset", "./assets/tileset.png");
+    this.load.image("tileset", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
     this.load.image("character1", "./assets/character1.png");
-    this.load.tilemapCSV("tilemap", "./assets/level1.csv");
+    this.load.tilemapCSV("tilemap", "./assets/lvl1.csv");
   }
 
   create() {
@@ -42,7 +42,7 @@ class Level1 extends Phaser.Scene {
 
     this.character.body.setSize(80, 200);
 
-    map.setCollisionBetween(0, 2);
+    map.setCollisionBetween(0, 200);
     this.physics.add.collider(this.character, layer);
 
     this.cursors = this.input.keyboard.createCursorKeys();
