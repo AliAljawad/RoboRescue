@@ -9,9 +9,12 @@ class Level2 extends Phaser.Scene {
     this.load.image("background", "./assets/background.png");
     this.load.image("character1", "./assets/character1.png");
     this.load.image("character2", "./assets/character1.png");
-    this.load.image("coin", "./assets/coin1.png"); // Load the coin image
+    this.load.image("coin", "./assets/coin1.png"); 
     this.load.tilemapCSV("tilemap", "./assets/level2.csv");
+    ///coin sound
     this.load.audio("coinSound", "./assets/coinSound.mp3");
+    ///jump sound
+    this.load.audio("jumpSound", "./assets/jumpSound.mp3"); 
   }
 
   create() {
@@ -45,6 +48,7 @@ class Level2 extends Phaser.Scene {
       .setScale(0.25);
 
     this.character.body.setSize(50, 50);
+    //character 2
 
     this.character2 = this.physics.add
       .sprite(1200, 100, "character2")
@@ -72,23 +76,23 @@ class Level2 extends Phaser.Scene {
     this.character2.setDebug(true, true, 0xff0000);
     this.character.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
+    // character 2 controls
     this.wasd = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
       left: Phaser.Input.Keyboard.KeyCodes.A,
       down: Phaser.Input.Keyboard.KeyCodes.S,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
-
+    /// timer top left corner
     this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.textTime.setScrollFactor(0); // Ensure the text stays in the top-left corner
+    this.textTime.setScrollFactor(0); 
 
-    // Create a group for coins
     this.coinsGroup = this.physics.add.staticGroup();
 
-    // Add coins at specific locations
+
     const coinPositions = [
       { x: 200, y: 150 },
       { x: 400, y: 250 },
@@ -101,19 +105,19 @@ class Level2 extends Phaser.Scene {
       this.coinsGroup.create(pos.x, pos.y, "coin").setScale(0.1);
     });
 
-    // Add overlap between coins and characters
     this.physics.add.overlap(this.character, this.coinsGroup, this.collectCoin, null, this);
     this.physics.add.overlap(this.character2, this.coinsGroup, this.collectCoin, null, this);
 
-    // Add the coin count text
+    //  coin counter top right corner
     this.coinText = this.add.text(1100, 10, "Coins: 0", {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.coinText.setScrollFactor(0); // Ensure the text stays in the top-left corner
+    this.coinText.setScrollFactor(0); 
 
+    //time remaing 
     this.timedEvent = this.time.addEvent({
-      delay: 99000, // 30 seconds
+      delay: 99000, 
       callback: this.gameOver,
       callbackScope: this,
       loop: false,
@@ -122,9 +126,10 @@ class Level2 extends Phaser.Scene {
 
   collectCoin(character, coin) {
     coin.disableBody(true, true);
+    //coin sound 
     this.sound.play("coinSound");
     this.coins += 1;
-    this.coinText.setText(`Coins: ${this.coins}`); // Update the coin count text
+    this.coinText.setText(`Coins: ${this.coins}`); 
     console.log("Coin collected:", this.coins);
 
     if (this.coins >= 5) {
@@ -133,6 +138,7 @@ class Level2 extends Phaser.Scene {
   }
 
   update() {
+    //remaining time
     this.remainingTime = this.timedEvent.getRemainingSeconds();
     this.textTime.setText(
       `Remaining Time: ${Math.round(this.remainingTime).toString()}`
@@ -146,6 +152,7 @@ class Level2 extends Phaser.Scene {
     }
 
     if (this.cursors.up.isDown && this.character.body.blocked.down) {
+      this.sound.play("jumpSound"); //  jump sound for character1
       this.character.setVelocityY(-500);
     }
     this.character2.setVelocityX(0);
@@ -157,13 +164,15 @@ class Level2 extends Phaser.Scene {
     }
 
     if (this.wasd.up.isDown && this.character2.body.blocked.down) {
+      this.sound.play("jumpSound"); //  jump sound for character2
       this.character2.setVelocityY(-500);
     }
   }
-
+//game over called when remaining time ends or when user fall
   gameOver() {
     this.scene.start("GameOver");
   }
+  // called  after the user advances to next level
 
   nextlvl() {
     console.log("Next level loaded.");
