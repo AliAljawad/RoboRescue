@@ -82,6 +82,8 @@ class Level1 extends Phaser.Scene {
     if (tile.index === 26 || tile.index === 41) {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
+    } else if (tile.index === 106) {
+      this.resetCharacter(character);
     }
   }
 
@@ -97,7 +99,7 @@ class Level1 extends Phaser.Scene {
   }
 
   resetCharacter(character, tile) {
-    character.setPosition(100, this.map.heightInPixels - 192);
+    character.setPosition(100, 500);
     console.log("Character reset due to hazard.");
   }
 
