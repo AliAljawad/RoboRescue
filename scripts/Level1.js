@@ -1,6 +1,7 @@
 class Level1 extends Phaser.Scene {
   constructor() {
     super({ key: "Level1" });
+    this.coins = 0;
   }
 
   preload() {
@@ -16,56 +17,102 @@ class Level1 extends Phaser.Scene {
       this.cameras.main.centerY,
       "background"
     );
-
     background.displayWidth = 1200;
     background.displayHeight = 600;
-
     background.setScrollFactor(0);
 
-    const map = this.make.tilemap({
+    this.map = this.make.tilemap({
       key: "tilemap",
       tileWidth: 32,
       tileHeight: 32,
     });
-    const tiles = map.addTilesetImage("tileset");
-    const layer = map.createLayer(0, tiles, 0, 0);
 
-    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    const tiles = this.map.addTilesetImage("tileset");
+    this.layer = this.map.createLayer(0, tiles, 0, 0);
+
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
 
     this.character = this.physics.add
       .sprite(100, 500, "character1")
-      .setOrigin(0.5, 0.8)
+      .setOrigin(0.5, 0)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
       .setDrag(100)
       .setGravityY(600);
+    this.character.body.setSize(80, 150);
+    this.character.setScale(0.5);
 
-    this.character.body.setSize(80, 200);
+    this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
-    map.setCollisionBetween(0, 200);
-    this.physics.add.collider(this.character, layer);
+    this.physics.add.collider(
+      this.character,
+      this.layer,
+      this.handleTileCollision,
+      null,
+      this
+    );
 
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.cameras.main.startFollow(this.character, true);
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.startFollow(
+      this.character,
+      true,
+      0.1,
+      0.1,
+      0,
+      -this.cameras.main.height / 2
+    );
+    this.cameras.main.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
 
-    this.physics.world.createDebugGraphic();
-    layer.setDepth(1);
+    this.layer.setDepth(1);
     this.character.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
   }
 
+  handleTileCollision(character, tile) {
+    if (tile.index === 26 || tile.index === 41) {
+      this.getCoin(character, tile);
+      console.log("Coin collected or hazard encountered.");
+    }
+  }
+
+  getCoin(character, tile) {
+    if (this.coins < 5) {
+      this.coins += 1;
+      console.log(this.coins);
+      this.layer.removeTileAt(tile.x, tile.y);
+      console.log("Coin collected, tile removed.");
+    } else {
+      nextlvl();
+    }
+  }
+
+  resetCharacter(character, tile) {
+    character.setPosition(100, this.map.heightInPixels - 192);
+    console.log("Character reset due to hazard.");
+  }
+
+  nextlvl() {
+    console.log("Next level loaded.");
+  }
   update() {
     this.character.setVelocityX(0);
-
     if (this.cursors.left.isDown) {
       this.character.setVelocityX(-200);
     } else if (this.cursors.right.isDown) {
       this.character.setVelocityX(200);
     }
-
     if (this.cursors.up.isDown && this.character.body.blocked.down) {
-      this.character.setVelocityY(-500);
+      this.character.setVelocityY(-625);
     }
   }
 }
