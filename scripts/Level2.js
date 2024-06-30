@@ -8,13 +8,13 @@ class Level2 extends Phaser.Scene {
     this.load.image("tileset1", "./assets/tileset.png");
     this.load.image("background", "./assets/background.png");
     this.load.image("character1", "./assets/character1.png");
-    this.load.image("character2", "./assets/character1.png");
-    this.load.image("coin", "./assets/coin1.png"); 
+    this.load.image("character2", "./assets/character2.png");
+    this.load.image("coin", "./assets/coin1.png");
     this.load.tilemapCSV("tilemap", "./assets/level2.csv");
     ///coin sound
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     ///jump sound
-    this.load.audio("jumpSound", "./assets/jumpSound.mp3"); 
+    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
   }
 
   create() {
@@ -88,36 +88,47 @@ class Level2 extends Phaser.Scene {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.textTime.setScrollFactor(0); 
+    this.textTime.setScrollFactor(0);
 
     this.coinsGroup = this.physics.add.staticGroup();
-
 
     const coinPositions = [
       { x: 200, y: 150 },
       { x: 400, y: 250 },
       { x: 600, y: 350 },
       { x: 800, y: 450 },
-      { x: 1000, y: 550 }
+      { x: 1000, y: 550 },
     ];
 
-    coinPositions.forEach(pos => {
+    coinPositions.forEach((pos) => {
       this.coinsGroup.create(pos.x, pos.y, "coin").setScale(0.1);
     });
 
-    this.physics.add.overlap(this.character, this.coinsGroup, this.collectCoin, null, this);
-    this.physics.add.overlap(this.character2, this.coinsGroup, this.collectCoin, null, this);
+    this.physics.add.overlap(
+      this.character,
+      this.coinsGroup,
+      this.collectCoin,
+      null,
+      this
+    );
+    this.physics.add.overlap(
+      this.character2,
+      this.coinsGroup,
+      this.collectCoin,
+      null,
+      this
+    );
 
     //  coin counter top right corner
     this.coinText = this.add.text(1100, 10, "Coins: 0", {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.coinText.setScrollFactor(0); 
+    this.coinText.setScrollFactor(0);
 
-    //time remaing 
+    //time remaing
     this.timedEvent = this.time.addEvent({
-      delay: 99000, 
+      delay: 99000,
       callback: this.gameOver,
       callbackScope: this,
       loop: false,
@@ -126,10 +137,10 @@ class Level2 extends Phaser.Scene {
 
   collectCoin(character, coin) {
     coin.disableBody(true, true);
-    //coin sound 
+    //coin sound
     this.sound.play("coinSound");
     this.coins += 1;
-    this.coinText.setText(`Coins: ${this.coins}`); 
+    this.coinText.setText(`Coins: ${this.coins}`);
     console.log("Coin collected:", this.coins);
 
     if (this.coins >= 5) {
@@ -167,8 +178,8 @@ class Level2 extends Phaser.Scene {
       this.sound.play("jumpSound"); //  jump sound for character2
       this.character2.setVelocityY(-500);
     }
-    }
-//game over called when remaining time ends or when user fall
+  }
+  //game over called when remaining time ends or when user fall
   gameOver() {
     this.scene.start("GameOver");
   }
