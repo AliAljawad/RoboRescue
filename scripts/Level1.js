@@ -8,7 +8,7 @@ class Level1 extends Phaser.Scene {
     this.load.image("tileset", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
     this.load.image("character1", "./assets/character1.png");
-    this.load.tilemapCSV("tilemap", "./assets/lvl1.csv");
+    this.load.tilemapCSV("tilemap1", "./assets/lvl1.csv");
   }
 
   create() {
@@ -22,7 +22,7 @@ class Level1 extends Phaser.Scene {
     background.setScrollFactor(0);
 
     this.map = this.make.tilemap({
-      key: "tilemap",
+      key: "tilemap1",
       tileWidth: 32,
       tileHeight: 32,
     });
@@ -104,7 +104,7 @@ class Level1 extends Phaser.Scene {
   }
 
   nextlvl() {
-    console.log("Next level loaded.");
+    this.scene.start("Level2");
   }
   update() {
     this.character.setVelocityX(0);

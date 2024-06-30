@@ -5,7 +5,7 @@ class Level2 extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("tileset", "./assets/tileset.png");
+    this.load.image("tileset1", "./assets/tileset.png");
     this.load.image("background", "./assets/background.png");
     this.load.image("character1", "./assets/character1.png");
     this.load.image("character2", "./assets/character1.png");
@@ -33,7 +33,7 @@ class Level2 extends Phaser.Scene {
       tileWidth: 32,
       tileHeight: 32,
     });
-    const tiles = map.addTilesetImage("tileset");
+    const tiles = map.addTilesetImage("tileset1");
     const layer = map.createLayer(0, tiles, 0, 0);
 
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -167,15 +167,14 @@ class Level2 extends Phaser.Scene {
       this.sound.play("jumpSound"); //  jump sound for character2
       this.character2.setVelocityY(-500);
     }
-  }
+    }
 //game over called when remaining time ends or when user fall
   gameOver() {
     this.scene.start("GameOver");
   }
   // called  after the user advances to next level
-
   nextlvl() {
-    console.log("Next level loaded.");
+    this.scene.start("Level1");
   }
 }
 
