@@ -51,7 +51,7 @@ class Level2 extends Phaser.Scene {
       .setScale(0.25);
       this.character.setTint(0x0000ff);
 
-    this.character.body.setSize(50, 50);
+      this.character.body.setSize(80, 150)
 
     this.character2 = this.physics.add
       .sprite(1170, 100, "character2")
@@ -63,7 +63,7 @@ class Level2 extends Phaser.Scene {
       .setScale(0.35);
       this.character2.setTint(0xff0000);   
 
-    this.character2.body.setSize(50, 50);
+    this.character2.body.setSize(80, 150)
 
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
