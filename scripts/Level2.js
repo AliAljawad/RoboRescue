@@ -5,16 +5,13 @@ class Level2 extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("tileset1", "./assets/tileset.png");
+    this.load.image("tileset1", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
     this.load.image("character1", "./assets/character1.png");
     this.load.image("character2", "./assets/character1.png");
-    this.load.image("coin", "./assets/coin1.png"); 
-    this.load.tilemapCSV("tilemap", "./assets/level2.csv");
-    ///coin sound
+    this.load.tilemapCSV("tilemap2", "./assets/lvl2.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
-    ///jump sound
-    this.load.audio("jumpSound", "./assets/jumpSound.mp3"); 
+    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
   }
 
   create() {
@@ -28,123 +25,117 @@ class Level2 extends Phaser.Scene {
     background.displayHeight = 600;
     background.setScrollFactor(0);
 
-    const map = this.make.tilemap({
-      key: "tilemap",
+    this.map = this.make.tilemap({
+      key: "tilemap2",
       tileWidth: 32,
       tileHeight: 32,
     });
-    const tiles = map.addTilesetImage("tileset1");
-    const layer = map.createLayer(0, tiles, 0, 0);
 
-    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    const tiles = this.map.addTilesetImage("tileset1");
+    this.layer = this.map.createLayer(0, tiles, 0, 0);
+
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
 
     this.character = this.physics.add
-      .sprite(100, 500, "character1")
+      .sprite(50, 500, "character1")
       .setOrigin(0.5, 0.8)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
       .setDrag(100)
       .setGravityY(600)
       .setScale(0.25);
+      this.character.setTint(0x0000ff);
 
     this.character.body.setSize(50, 50);
-    //character 2
 
     this.character2 = this.physics.add
-      .sprite(1200, 100, "character2")
+      .sprite(1170, 100, "character2")
       .setOrigin(0.5, 0.8)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
       .setDrag(100)
       .setGravityY(600)
-      .setScale(0.5);
+      .setScale(0.35);
+      this.character2.setTint(0xff0000);   
 
     this.character2.body.setSize(50, 50);
 
-    map.setCollisionBetween(0, 2);
-    this.physics.add.collider(this.character, layer);
-    map.setCollisionBetween(0, 2);
-    this.physics.add.collider(this.character2, layer);
+    this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
+
+    this.physics.add.collider(this.character, this.layer, this.handleTileCollision, null, this);
+    this.physics.add.collider(this.character2, this.layer, this.handleTileCollision, null, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cameras.main.startFollow(this.character, true);
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
-    this.physics.world.createDebugGraphic();
-    layer.setDepth(1);
+    this.layer.setDepth(1);
     this.character2.setDepth(2);
     this.character2.setDebug(true, true, 0xff0000);
     this.character.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
-    // character 2 controls
+
     this.wasd = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
       left: Phaser.Input.Keyboard.KeyCodes.A,
       down: Phaser.Input.Keyboard.KeyCodes.S,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
-    /// timer top left corner
+
     this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.textTime.setScrollFactor(0); 
+    this.textTime.setScrollFactor(0);
 
-    this.coinsGroup = this.physics.add.staticGroup();
-
-
-    const coinPositions = [
-      { x: 200, y: 150 },
-      { x: 400, y: 250 },
-      { x: 600, y: 350 },
-      { x: 800, y: 450 },
-      { x: 1000, y: 550 }
-    ];
-
-    coinPositions.forEach(pos => {
-      this.coinsGroup.create(pos.x, pos.y, "coin").setScale(0.1);
-    });
-
-    this.physics.add.overlap(this.character, this.coinsGroup, this.collectCoin, null, this);
-    this.physics.add.overlap(this.character2, this.coinsGroup, this.collectCoin, null, this);
-
-    //  coin counter top right corner
     this.coinText = this.add.text(1100, 10, "Coins: 0", {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.coinText.setScrollFactor(0); 
+    this.coinText.setScrollFactor(0);
 
-    //time remaing 
     this.timedEvent = this.time.addEvent({
-      delay: 99000, 
+      delay: 99000,
       callback: this.gameOver,
       callbackScope: this,
       loop: false,
     });
   }
 
-  collectCoin(character, coin) {
-    coin.disableBody(true, true);
-    //coin sound 
+  handleTileCollision(character, tile) {
+    if (tile.index === 26 && character.texture.key === 'character1') {
+      this.getCoin(character, tile);
+      console.log("Coin collected by character1.");
+    } else if (tile.index === 41 && character.texture.key === 'character2') {
+      this.getCoin(character, tile);
+      console.log("Coin collected by character2.");
+    } else if (tile.index === 106 || tile.index === 105 || tile.index === 120) {
+      this.character.setPosition(50, 500);
+      this.character2.setPosition(1168,50);
+    }
+  }
+  getCoin(character, tile) {
     this.sound.play("coinSound");
     this.coins += 1;
-    this.coinText.setText(`Coins: ${this.coins}`); 
+    this.coinText.setText(`Coins: ${this.coins}`);
     console.log("Coin collected:", this.coins);
+    this.layer.removeTileAt(tile.x, tile.y);
 
-    if (this.coins >= 5) {
+    if (this.coins >= 6) {
       this.nextlvl();
     }
   }
 
   update() {
-    //remaining time
     this.remainingTime = this.timedEvent.getRemainingSeconds();
-    this.textTime.setText(
-      `Remaining Time: ${Math.round(this.remainingTime).toString()}`
-    );
-    this.character.setVelocityX(0);
+    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`);
 
+    this.character.setVelocityX(0);
     if (this.cursors.left.isDown) {
       this.character.setVelocityX(-200);
     } else if (this.cursors.right.isDown) {
@@ -152,11 +143,11 @@ class Level2 extends Phaser.Scene {
     }
 
     if (this.cursors.up.isDown && this.character.body.blocked.down) {
-      this.sound.play("jumpSound"); //  jump sound for character1
+      this.sound.play("jumpSound");
       this.character.setVelocityY(-500);
     }
-    this.character2.setVelocityX(0);
 
+    this.character2.setVelocityX(0);
     if (this.wasd.left.isDown) {
       this.character2.setVelocityX(-200);
     } else if (this.wasd.right.isDown) {
@@ -164,15 +155,24 @@ class Level2 extends Phaser.Scene {
     }
 
     if (this.wasd.up.isDown && this.character2.body.blocked.down) {
-      this.sound.play("jumpSound"); //  jump sound for character2
+      this.sound.play("jumpSound");
       this.character2.setVelocityY(-500);
     }
+
+    // Check if character falls below the screen
+    if (this.character.y > this.physics.world.bounds.height) {
+      this.character.setPosition(50, 500);
     }
-//game over called when remaining time ends or when user fall
+
+    if (this.character2.y > this.physics.world.bounds.height) {
+      this.character2.setPosition(1168,50);
+    }
+  }
+
   gameOver() {
     this.scene.start("GameOver");
   }
-  // called  after the user advances to next level
+
   nextlvl() {
     this.scene.start("Level1");
   }
