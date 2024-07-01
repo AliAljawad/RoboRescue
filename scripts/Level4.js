@@ -230,7 +230,7 @@ class Level4 extends Phaser.Scene {
     console.log("Coins have been reset on the map.");
   }
   nextlvl() {
-    this.scene.start("Level2");
+    window.location.href = '../pages/gameEnding.html';
   }
   update() {
     this.updateCharacter(this.character, this.cursors);
