@@ -7,12 +7,19 @@ class Level3 extends Phaser.Scene {
   preload() {
     this.load.image("tileset", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
-    this.load.image("character1", "./assets/character1.png");
-    this.load.image("character2", "./assets/character1.png");
+    this.load.image(
+      "character1",
+      this.loadImageFromLocalStorage1("character1")
+    );
+    this.load.image(
+      "character2",
+      this.loadImageFromLocalStorage2("character2")
+    );
     this.load.tilemapCSV("tilemap", "./assets/lvl3.csv");
-    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
+    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
+
   }
 
   create() {
@@ -114,7 +121,7 @@ class Level3 extends Phaser.Scene {
 
     this.layer.setDepth(1);
     this.character.setDepth(2);
-      this.character.setDepth(2);
+      this.character2.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
 
     //time remaing 
@@ -149,6 +156,22 @@ class Level3 extends Phaser.Scene {
       }
     }
   }
+
+  loadImageFromLocalStorage1(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character1.png";
+  }
+  loadImageFromLocalStorage2(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character2.png";
+  }
+
 
   resetCharacter() {
     this.resetCoins(); // Call to reset the coins on the map
@@ -193,6 +216,7 @@ class Level3 extends Phaser.Scene {
       this.character.setVelocityX(200);
     }
     if (this.cursors.up.isDown && this.character.body.blocked.down) {
+      this.sound.play("jumpSound");
       this.character.setVelocityY(-625);
     }
 
