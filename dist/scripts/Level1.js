@@ -35,6 +35,21 @@ class Level1 extends Phaser.Scene {
       tileWidth: 32,
       tileHeight: 32,
     });
+    console.log("Tilemap loaded:", map);
+
+    // Check if the tilemap is loaded
+    if (!map) {
+      console.error("Tilemap not loaded");
+      return;
+    }
+    if (!layer) {
+      console.error("Layer not created");
+      return;
+    }
+
+    // Set collision for the layer
+    
+  
 
     const tiles = this.map.addTilesetImage("tileset");
     this.layer = this.map.createLayer(0, tiles, 0, 0);
@@ -56,8 +71,7 @@ class Level1 extends Phaser.Scene {
     this.character.body.setSize(80, 150);
     this.character.setScale(0.5);
 
-    this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
-
+    layer.setCollisionByExclusion([-1]);
     this.physics.add.collider(
       this.character,
       this.layer,
