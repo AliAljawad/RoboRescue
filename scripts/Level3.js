@@ -7,9 +7,18 @@ class Level3 extends Phaser.Scene {
   preload() {
     this.load.image("tileset", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
-    this.load.image("character1", "./assets/character1.png");
-    this.load.image("character2", "./assets/character1.png");
-    this.load.tilemapCSV("tilemap", "./assets/level3.csv");
+    this.load.image(
+      "character1",
+      this.loadImageFromLocalStorage1("character1")
+    );
+    this.load.image(
+      "character2",
+      this.loadImageFromLocalStorage2("character2")
+    );
+    this.load.tilemapCSV("tilemap", "./assets/lvl3.csv");
+    this.load.audio("coinSound", "./assets/coinSound.mp3");
+    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
+    this.coinPositions = [];
   }
 
   create() {
@@ -65,14 +74,6 @@ class Level3 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    /// timer top left corner
-    this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
-      font: "25px Arial",
-      fill: "#000000",
-    });
-
-    this.textTime.setScrollFactor(0); 
-
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
     this.physics.add.collider(
@@ -100,6 +101,7 @@ class Level3 extends Phaser.Scene {
       0,
       -this.cameras.main.height / 2
     );
+
     this.cameras.main.setBounds(
       0,
       0,
@@ -109,19 +111,26 @@ class Level3 extends Phaser.Scene {
 
     this.layer.setDepth(1);
     this.character.setDepth(2);
+    this.character2.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
 
-    //time remaing 
-    this.timedEvent = this.time.addEvent({
-      delay: 99000, 
-      callback: this.gameOver,
-      callbackScope: this,
-      loop: false,
+    this.initializeCoins();
+  }
+
+  initializeCoins() {
+    this.map.forEachTile((tile) => {
+      if (tile.index == 26 || tile.index == 41) {
+        this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
     });
   }
 
   handleTileCollision(character, tile) {
-    if (tile.index === 26 || tile.index === 41) {
+    // 26 is tile id for chr 2 ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) )
+    if (
+      (tile.index === 26 && character == this.character2) ||
+      (tile.index === 41 && character == this.character)
+    ) {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
     } else if (tile.index === 105 || tile.index === 106) {
@@ -133,14 +142,30 @@ class Level3 extends Phaser.Scene {
     }
   }
 
+  loadImageFromLocalStorage1(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character1.png";
+  }
+  loadImageFromLocalStorage2(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character2.png";
+  }
+
   resetCharacter() {
+    this.resetCoins(); // Call to reset the coins on the map
     this.character.setPosition(100, 500);
     this.character2.setPosition(1100, 500);
     console.log("Character reset due to hazard.");
   }
 
   getCoin(character, tile) {
-    if (this.coins < 5) {
+    if (this.coins < 7) {
       this.coins += 1;
       console.log(this.coins);
       this.layer.removeTileAt(tile.x, tile.y);
@@ -149,16 +174,19 @@ class Level3 extends Phaser.Scene {
       nextlvl();
     }
   }
+  resetCoins() {
+    this.coinPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
+      this.coins = 0;
+    });
+    console.log("Coins have been reset on the map.");
+  }
 
   nextlvl() {
     console.log("Next level loaded.");
   }
   update() {
     //remaining time
-    this.remainingTime = this.timedEvent.getRemainingSeconds();
-    this.textTime.setText(
-      `Remaining Time: ${Math.round(this.remainingTime).toString()}`
-    );
 
     this.character.setVelocityX(0);
     if (this.cursors.left.isDown) {
@@ -168,6 +196,7 @@ class Level3 extends Phaser.Scene {
       this.character.setVelocityX(200);
     }
     if (this.cursors.up.isDown && this.character.body.blocked.down) {
+      this.sound.play("jumpSound");
       this.character.setVelocityY(-625);
     }
 
@@ -180,6 +209,7 @@ class Level3 extends Phaser.Scene {
     }
 
     if (this.wasd.up.isDown && this.character2.body.blocked.down) {
+      this.sound.play("jumpSound");
       this.character2.setVelocityY(-625);
     }
   }
