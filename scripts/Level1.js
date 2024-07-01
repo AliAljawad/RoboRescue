@@ -7,11 +7,17 @@ class Level1 extends Phaser.Scene {
   preload() {
     this.load.image("tileset", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
-    this.load.image("character1", "./assets/character1.png");
+    this.load.image(
+      "character1",
+      this.loadImageFromLocalStorage1("character1")
+    );
+    this.load.image(
+      "character2",
+      this.loadImageFromLocalStorage2("character2")
+    );
     this.load.tilemapCSV("tilemap1", "./assets/lvl1.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
-    this.load.image("character2", "./assets/character2.png");
     this.coinPositions = [];
 
     // Example of initializing coins -- you'll adjust this based on your actual coin setup
@@ -24,7 +30,7 @@ class Level1 extends Phaser.Scene {
       "background"
     );
     background.displayWidth = 1200;
-    background.displayHeight = 600;
+    background.displayHeight = 800;
     background.setScrollFactor(0);
 
     this.map = this.make.tilemap({
@@ -91,8 +97,8 @@ class Level1 extends Phaser.Scene {
     this.cameras.main.startFollow(
       this.character,
       true,
-      0.1,
-      0.1,
+      0.2,
+      0.2,
       0,
       -this.cameras.main.height / 2
     );
@@ -140,7 +146,20 @@ class Level1 extends Phaser.Scene {
       this.nextlvl();
     }
   }
-
+  loadImageFromLocalStorage1(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character1.png";
+  }
+  loadImageFromLocalStorage2(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character2.png";
+  }
   resetCharacter(character, character2) {
     character.setPosition(100, 500);
     character2.setPosition(100, 500);
@@ -160,6 +179,15 @@ class Level1 extends Phaser.Scene {
   update() {
     this.updateCharacter(this.character, this.cursors);
     this.updateCharacter(this.character2, this.wasd);
+
+    // Manually adjust camera position based on character's Y position
+    if (
+      this.character.y <
+      this.cameras.main.scrollY + this.cameras.main.height / 2
+    ) {
+      this.cameras.main.scrollY =
+        this.character.y - this.cameras.main.height / 2;
+    }
   }
 
   updateCharacter(character, controls) {
