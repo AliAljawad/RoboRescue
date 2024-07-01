@@ -49,7 +49,7 @@ class Level3 extends Phaser.Scene {
     );
 
     this.character = this.physics.add
-      .sprite(100, 500, "character1")
+      .sprite(100, 600, "character1")
       .setOrigin(0.5, 0)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
@@ -59,7 +59,7 @@ class Level3 extends Phaser.Scene {
     this.character.setScale(0.5);
 
     this.character2 = this.physics.add
-      .sprite(1100, 500, "character2")
+      .sprite(1100, 600, "character2")
       .setOrigin(0.5, 0)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
@@ -80,8 +80,14 @@ class Level3 extends Phaser.Scene {
       font: "25px Arial",
       fill: "#000000",
     });
+    this.textTime.setScrollFactor(0);
 
-    this.textTime.setScrollFactor(0); 
+
+    this.coinText = this.add.text(1100, 10, "Coins: 0", {
+      font: "25px Arial",
+      fill: "#000000",
+    });
+    this.coinText.setScrollFactor(0);
 
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
@@ -175,14 +181,16 @@ class Level3 extends Phaser.Scene {
 
   resetCharacter() {
     this.resetCoins(); // Call to reset the coins on the map
-    this.character.setPosition(100, 500);
-    this.character2.setPosition(1100, 500);
+    this.character.setPosition(100, 600);
+    this.character2.setPosition(1100, 600);
     console.log("Character reset due to hazard.");
   }
 
   getCoin(character, tile) {
     if (this.coins < 7) {
+      this.sound.play("coinSound");
       this.coins += 1;
+      this.coinText.setText(`Coins: ${this.coins}`);
       console.log(this.coins);
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
@@ -191,6 +199,7 @@ class Level3 extends Phaser.Scene {
     }
   }
   resetCoins() {
+    this.coinText.setText(`Coins: 0`);
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
