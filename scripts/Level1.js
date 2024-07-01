@@ -137,7 +137,7 @@ class Level1 extends Phaser.Scene {
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
     } else {
-      nextlvl();
+      this.nextlvl();
     }
   }
 
