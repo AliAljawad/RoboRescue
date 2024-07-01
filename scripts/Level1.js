@@ -7,8 +7,20 @@ class Level1 extends Phaser.Scene {
   preload() {
     this.load.image("tileset", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
-    this.load.image("character1", "./assets/character1.png");
-    this.load.tilemapCSV("tilemap", "./assets/lvl1.csv");
+    this.load.image(
+      "character1",
+      this.loadImageFromLocalStorage1("character1")
+    );
+    this.load.image(
+      "character2",
+      this.loadImageFromLocalStorage2("character2")
+    );
+    this.load.tilemapCSV("tilemap1", "./assets/lvl1.csv");
+    this.load.audio("coinSound", "./assets/coinSound.mp3");
+    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
+    this.coinPositions = [];
+
+    // Example of initializing coins -- you'll adjust this based on your actual coin setup
   }
 
   create() {
@@ -18,11 +30,11 @@ class Level1 extends Phaser.Scene {
       "background"
     );
     background.displayWidth = 1200;
-    background.displayHeight = 600;
+    background.displayHeight = 800;
     background.setScrollFactor(0);
 
     this.map = this.make.tilemap({
-      key: "tilemap",
+      key: "tilemap1",
       tileWidth: 32,
       tileHeight: 32,
     });
@@ -47,10 +59,34 @@ class Level1 extends Phaser.Scene {
     this.character.body.setSize(80, 150);
     this.character.setScale(0.5);
 
+    this.character2 = this.physics.add
+      .sprite(100, 500, "character2")
+      .setOrigin(0.7, 0)
+      .setCollideWorldBounds(true)
+      .setBounce(0.2)
+      .setDrag(0)
+      .setGravityY(600);
+    this.character2.body.setSize(80, 150);
+    this.character2.setScale(0.5);
+
+    this.wasd = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+    });
+
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
     this.physics.add.collider(
       this.character,
+      this.layer,
+      this.handleTileCollision,
+      null,
+      this
+    );
+    this.physics.add.collider(
+      this.character2,
       this.layer,
       this.handleTileCollision,
       null,
@@ -61,8 +97,8 @@ class Level1 extends Phaser.Scene {
     this.cameras.main.startFollow(
       this.character,
       true,
-      0.1,
-      0.1,
+      0.2,
+      0.2,
       0,
       -this.cameras.main.height / 2
     );
@@ -75,15 +111,28 @@ class Level1 extends Phaser.Scene {
 
     this.layer.setDepth(1);
     this.character.setDepth(2);
-    this.character.setDebug(true, true, 0xff0000);
-  }
+    this.character2.setDepth(2);
 
+    this.character.setDebug(true, true, 0xff0000);
+    this.initializeCoins();
+  }
+  initializeCoins() {
+    this.map.forEachTile((tile) => {
+      if (tile.index == 26 || tile.index == 41) {
+        // Assuming these are coin tiles
+        this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
+    });
+  }
   handleTileCollision(character, tile) {
-    if (tile.index === 26 || tile.index === 41) {
+    if (tile.index === 41 && character === this.character) {
+      this.getCoin(character, tile);
+      console.log("Coin collected or hazard encountered.");
+    } else if (tile.index === 26 && character === this.character2) {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
     } else if (tile.index === 106) {
-      this.resetCharacter(character);
+      this.resetCharacter(this.character, this.character2);
     }
   }
 
@@ -94,27 +143,64 @@ class Level1 extends Phaser.Scene {
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
     } else {
-      nextlvl();
+      this.nextlvl();
     }
   }
-
-  resetCharacter(character, tile) {
-    character.setPosition(100, 500);
-    console.log("Character reset due to hazard.");
+  loadImageFromLocalStorage1(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character1.png";
   }
-
+  loadImageFromLocalStorage2(key) {
+    let imgData = localStorage.getItem(key);
+    if (imgData) {
+      return imgData;
+    }
+    return "assets/character2.png";
+  }
+  resetCharacter(character, character2) {
+    character.setPosition(100, 500);
+    character2.setPosition(100, 500);
+    this.resetCoins(); // Call to reset the coins on the map
+    console.log("Characters and coins reset due to hazard.");
+  }
+  resetCoins() {
+    this.coinPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
+      this.coins = 0;
+    });
+    console.log("Coins have been reset on the map.");
+  }
   nextlvl() {
-    console.log("Next level loaded.");
+    this.scene.start("Level2");
   }
   update() {
-    this.character.setVelocityX(0);
-    if (this.cursors.left.isDown) {
-      this.character.setVelocityX(-200);
-    } else if (this.cursors.right.isDown) {
-      this.character.setVelocityX(200);
+    this.updateCharacter(this.character, this.cursors);
+    this.updateCharacter(this.character2, this.wasd);
+
+    // Manually adjust camera position based on character's Y position
+    if (
+      this.character.y <
+      this.cameras.main.scrollY + this.cameras.main.height / 2
+    ) {
+      this.cameras.main.scrollY =
+        this.character.y - this.cameras.main.height / 2;
     }
-    if (this.cursors.up.isDown && this.character.body.blocked.down) {
-      this.character.setVelocityY(-625);
+  }
+
+  updateCharacter(character, controls) {
+    if (controls.left.isDown || controls.right.isDown) {
+      character.setDrag(0); // No drag when moving
+      character.setVelocityX(controls.left.isDown ? -200 : 200);
+    } else {
+      character.setDrag(100); // Apply drag to stop more abruptly when no keys are pressed
+      character.setVelocityX(0); // Reset horizontal velocity to stop sliding
+    }
+    if (controls.up.isDown && character.body.blocked.down) {
+      this.sound.play("jumpSound");
+      character.setVelocityY(-625);
     }
   }
 }
