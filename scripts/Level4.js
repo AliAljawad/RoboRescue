@@ -74,19 +74,19 @@ class Level4 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    this.layer.setCollisionByExclusion([-1, 0]); // Include 101 and 86 as collidable
+    this.layer.setCollisionByExclusion([-1, 0]);
 
     this.physics.add.collider(
       this.character,
       this.layer,
-      (character, tile) => this.handleTileCollision(character, tile, [72, 57]), // Allow phasing through 72 and 57 for character
+      (character, tile) => this.handleTileCollision(character, tile, [72, 57]),
       null,
       this
     );
     this.physics.add.collider(
       this.character2,
       this.layer,
-      (character, tile) => this.handleTileCollision(character, tile, [71, 56]), // Allow phasing through 71 and 56 for character2
+      (character, tile) => this.handleTileCollision(character, tile, [71, 56]),
       null,
       this
     );
@@ -117,66 +117,59 @@ class Level4 extends Phaser.Scene {
   initializeCoins() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
-        // Assuming these are coin tiles
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
     });
   }
   handleTileCollision(character, tile, phasingTiles) {
     if (phasingTiles.includes(tile.index)) {
-      // Phasing logic
       this.teleportCharacter(character, tile, phasingTiles);
       console.log("Phasing through tile");
-      return; // Do nothing else since we're phasing
+      return;
     }
 
     if (tile.index === 101 && character === this.character) {
-      this.removeTiles([72, 57]); // Remove specified tiles for character1
-      this.disableTileCollision(tile); // Disable collision for tile 101
+      this.removeTiles([72, 57]);
+      this.disableTileCollision(tile);
       console.log(
         "Tile 101 touched by character1, specified tiles removed and collision disabled."
       );
     }
 
     if (tile.index === 86 && character === this.character2) {
-      this.removeTiles([71, 56]); // Remove specified tiles for character2
-      this.disableTileCollision(tile); // Disable collision for tile 86
+      this.removeTiles([71, 56]);
+      this.disableTileCollision(tile);
       console.log(
         "Tile 86 touched by character2, specified tiles removed and collision disabled."
       );
     }
 
-    // Normal collision handling, passing phasingTiles
     this.normalTileCollision(character, tile, phasingTiles);
   }
 
   teleportCharacter(character, tile, phasingTiles) {
     if (phasingTiles.includes(tile.index)) {
-      // Phasing logic: Teleport the character to the other side of the tile
       if (character.body.velocity.x > 0) {
-        // Moving right
-        character.x = (tile.x - 2) * tile.width; // Teleport to the right side of the tile
+        character.x = (tile.x - 2) * tile.width;
       } else if (character.body.velocity.x < 0) {
-        // Moving left
-        character.x = (tile.x + 2) * tile.width; // Teleport to the left side of the tile
+        character.x = (tile.x + 2) * tile.width;
       }
       console.log("Phasing through tile");
     }
   }
-  // Handle normal collision for non-phasing tiles
+
   normalTileCollision(character, tile) {
     if (tile.index === 41 && character === this.character) {
       this.getCoin(character, tile);
     } else if (tile.index === 26 && character === this.character2) {
       this.getCoin(character, tile);
     } else {
-      this.resetCharacterIfNecessary(character, tile); // Passing phasingTiles if used inside this method
+      this.resetCharacterIfNecessary(character, tile);
     }
   }
 
   disableTileCollision(tile) {
     if (tile) {
-      // Set tile collision flag to false
       tile.setCollision(false);
     }
   }
@@ -226,7 +219,7 @@ class Level4 extends Phaser.Scene {
   resetCharacter(character, character2) {
     character.setPosition(100, 500);
     character2.setPosition(100, 500);
-    this.resetCoins(); // Call to reset the coins on the map
+    this.resetCoins();
     console.log("Characters and coins reset due to hazard.");
   }
   resetCoins() {
@@ -243,7 +236,6 @@ class Level4 extends Phaser.Scene {
     this.updateCharacter(this.character, this.cursors);
     this.updateCharacter(this.character2, this.wasd);
 
-    // Manually adjust camera position based on character's Y position
     if (
       this.character.y <
       this.cameras.main.scrollY + this.cameras.main.height / 2
@@ -255,11 +247,11 @@ class Level4 extends Phaser.Scene {
 
   updateCharacter(character, controls) {
     if (controls.left.isDown || controls.right.isDown) {
-      character.setDrag(0); // No drag when moving
+      character.setDrag(0);
       character.setVelocityX(controls.left.isDown ? -200 : 200);
     } else {
-      character.setDrag(100); // Apply drag to stop more abruptly when no keys are pressed
-      character.setVelocityX(0); // Reset horizontal velocity to stop sliding
+      character.setDrag(100);
+      character.setVelocityX(0);
     }
     if (controls.up.isDown && character.body.blocked.down) {
       this.sound.play("jumpSound");
