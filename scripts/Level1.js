@@ -9,6 +9,15 @@ class Level1 extends Phaser.Scene {
     this.load.image("background", "assets/background.png");
     this.load.image("character1", "assets/character1.png");
     this.load.tilemapCSV("tilemap1", "assets/lvl1.csv");
+
+    // Ensure all assets are loaded before proceeding
+    this.load.on('complete', () => {
+      console.log('Assets loaded');
+    });
+
+    this.load.on('error', (file) => {
+      console.error(`Failed to load: ${file.key}`);
+    });
   }
 
   create() {
