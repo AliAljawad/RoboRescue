@@ -171,7 +171,7 @@ class Level3 extends Phaser.Scene {
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
     } else {
-      nextlvl();
+      this.nextlvl();
     }
   }
   resetCoins() {
@@ -183,7 +183,7 @@ class Level3 extends Phaser.Scene {
   }
 
   nextlvl() {
-    console.log("Next level loaded.");
+    this.scene.start("Level4");
   }
   update() {
     //remaining time
@@ -215,9 +215,6 @@ class Level3 extends Phaser.Scene {
   }
   gameOver() {
     this.scene.start("GameOver");
-  }
-  nextlvl() {
-    console.log("Next level loaded.");
   }
 }
 
