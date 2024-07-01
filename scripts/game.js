@@ -14,7 +14,29 @@ var config = {
       debug: true,
     },
   },
-  scene: [Level1, Level2, Level3, Level4],
+  scene: [Level4],
 };
 
 var game = new Phaser.Game(config);
+
+// Assuming the Phaser game instance is stored in a variable named `game`
+function resizeGame() {
+  var gameContainer = document.getElementById("gameContainer");
+  var width = gameContainer.clientWidth; // Width of the container
+  var height = gameContainer.clientHeight; // Height of the container
+  var gameRatio = game.config.width / game.config.height; // Original game ratio
+  var currentRatio = width / height;
+
+  if (currentRatio < gameRatio) {
+    game.canvas.style.width = width + "px";
+    game.canvas.style.height = width / gameRatio + "px";
+  } else {
+    game.canvas.style.width = height * gameRatio + "px";
+    game.canvas.style.height = height + "px";
+  }
+}
+
+window.onload = function () {
+  resizeGame();
+  window.addEventListener("resize", resizeGame);
+};
