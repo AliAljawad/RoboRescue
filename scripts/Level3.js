@@ -19,7 +19,6 @@ class Level3 extends Phaser.Scene {
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
-
   }
 
   create() {
@@ -75,14 +74,6 @@ class Level3 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    /// timer top left corner
-    this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
-      font: "25px Arial",
-      fill: "#000000",
-    });
-
-    this.textTime.setScrollFactor(0); 
-
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
     this.physics.add.collider(
@@ -111,7 +102,6 @@ class Level3 extends Phaser.Scene {
       -this.cameras.main.height / 2
     );
 
-
     this.cameras.main.setBounds(
       0,
       0,
@@ -121,16 +111,9 @@ class Level3 extends Phaser.Scene {
 
     this.layer.setDepth(1);
     this.character.setDepth(2);
-      this.character2.setDepth(2);
+    this.character2.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
 
-    //time remaing 
-    this.timedEvent = this.time.addEvent({
-      delay: 99000, 
-      callback: this.gameOver,
-      callbackScope: this,
-      loop: false,
-    });
     this.initializeCoins();
   }
 
@@ -142,10 +125,12 @@ class Level3 extends Phaser.Scene {
     });
   }
 
-
   handleTileCollision(character, tile) {
     // 26 is tile id for chr 2 ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) )
-    if ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) ) {
+    if (
+      (tile.index === 26 && character == this.character2) ||
+      (tile.index === 41 && character == this.character)
+    ) {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
     } else if (tile.index === 105 || tile.index === 106) {
@@ -171,7 +156,6 @@ class Level3 extends Phaser.Scene {
     }
     return "assets/character2.png";
   }
-
 
   resetCharacter() {
     this.resetCoins(); // Call to reset the coins on the map
@@ -203,10 +187,6 @@ class Level3 extends Phaser.Scene {
   }
   update() {
     //remaining time
-    this.remainingTime = this.timedEvent.getRemainingSeconds();
-    this.textTime.setText(
-      `Remaining Time: ${Math.round(this.remainingTime).toString()}`
-    );
 
     this.character.setVelocityX(0);
     if (this.cursors.left.isDown) {
