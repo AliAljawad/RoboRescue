@@ -15,7 +15,7 @@ class Level3 extends Phaser.Scene {
       "character2",
       this.loadImageFromLocalStorage2("character2")
     );
-    this.load.tilemapCSV("tilemap", "./assets/lvl3.csv");
+    this.load.tilemapCSV("tilemap3", "./assets/lvl3.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
@@ -28,11 +28,11 @@ class Level3 extends Phaser.Scene {
       "background"
     );
     background.displayWidth = 1200;
-    background.displayHeight = 600;
+    background.displayHeight = 800;
     background.setScrollFactor(0);
 
     this.map = this.make.tilemap({
-      key: "tilemap",
+      key: "tilemap3",
       tileWidth: 32,
       tileHeight: 32,
     });
@@ -58,11 +58,11 @@ class Level3 extends Phaser.Scene {
     this.character.setScale(0.5);
 
     this.character2 = this.physics.add
-      .sprite(1100, 500, "character2")
-      .setOrigin(0.5, 0)
+      .sprite(100, 500, "character2")
+      .setOrigin(0.7, 0)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
-      .setDrag(100)
+      .setDrag(0)
       .setGravityY(600);
     this.character2.body.setSize(80, 150);
     this.character2.setScale(0.5);
@@ -74,20 +74,19 @@ class Level3 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
+    this.layer.setCollisionByExclusion([-1, 0]);
 
     this.physics.add.collider(
       this.character,
       this.layer,
-      this.handleTileCollision,
+      (character, tile) => this.handleTileCollision(character, tile, [72, 57]),
       null,
       this
     );
-
     this.physics.add.collider(
       this.character2,
       this.layer,
-      this.handleTileCollision,
+      (character, tile) => this.handleTileCollision(character, tile, [71, 56]),
       null,
       this
     );
@@ -96,12 +95,11 @@ class Level3 extends Phaser.Scene {
     this.cameras.main.startFollow(
       this.character,
       true,
-      0.1,
-      0.1,
+      0.2,
+      0.2,
       0,
       -this.cameras.main.height / 2
     );
-
     this.cameras.main.setBounds(
       0,
       0,
@@ -112,11 +110,10 @@ class Level3 extends Phaser.Scene {
     this.layer.setDepth(1);
     this.character.setDepth(2);
     this.character2.setDepth(2);
-    this.character.setDebug(true, true, 0xff0000);
 
+    this.character.setDebug(true, true, 0xff0000);
     this.initializeCoins();
   }
-
   initializeCoins() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
@@ -124,24 +121,88 @@ class Level3 extends Phaser.Scene {
       }
     });
   }
+  handleTileCollision(character, tile, phasingTiles) {
+    if (phasingTiles.includes(tile.index)) {
+      this.teleportCharacter(character, tile, phasingTiles);
+      console.log("Phasing through tile");
+      return;
+    }
 
-  handleTileCollision(character, tile) {
-    // 26 is tile id for chr 2 ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) )
-    if (
-      (tile.index === 26 && character == this.character2) ||
-      (tile.index === 41 && character == this.character)
-    ) {
-      this.getCoin(character, tile);
-      console.log("Coin collected or hazard encountered.");
-    } else if (tile.index === 105 || tile.index === 106) {
-      console.log(character.body.blocked.down);
-      console.log(character == this.character2);
-      if (character.body.blocked.down) {
-        this.resetCharacter();
+    if (tile.index === 101 && character === this.character) {
+      this.removeTiles([72, 57]);
+      this.disableTileCollision(tile);
+      console.log(
+        "Tile 101 touched by character1, specified tiles removed and collision disabled."
+      );
+    }
+
+    if (tile.index === 86 && character === this.character2) {
+      this.removeTiles([71, 56]);
+      this.disableTileCollision(tile);
+      console.log(
+        "Tile 86 touched by character2, specified tiles removed and collision disabled."
+      );
+    }
+
+    this.normalTileCollision(character, tile, phasingTiles);
+  }
+
+  teleportCharacter(character, tile, phasingTiles) {
+    if (phasingTiles.includes(tile.index)) {
+      if (character.body.velocity.x > 0) {
+        character.x = (tile.x - 2) * tile.width;
+      } else if (character.body.velocity.x < 0) {
+        character.x = (tile.x + 2) * tile.width;
       }
+      console.log("Phasing through tile");
     }
   }
 
+  normalTileCollision(character, tile) {
+    if (tile.index === 41 && character === this.character) {
+      this.getCoin(character, tile);
+    } else if (tile.index === 26 && character === this.character2) {
+      this.getCoin(character, tile);
+    } else {
+      this.resetCharacterIfNecessary(character, tile);
+    }
+  }
+
+  disableTileCollision(tile) {
+    if (tile) {
+      tile.setCollision(false);
+    }
+  }
+  resetCharacterIfNecessary(character, tile) {
+    if (
+      tile.index === 106 ||
+      ((tile.index === 72 || tile.index === 57) &&
+        character === this.character2) ||
+      ((tile.index === 71 || tile.index === 56) && character === this.character)
+    ) {
+      this.resetCharacter(this.character, this.character2);
+    }
+  }
+
+  removeTiles(tileIndices) {
+    this.map.forEachTile((tile) => {
+      if (tileIndices.includes(tile.index)) {
+        this.layer.removeTileAt(tile.x, tile.y);
+      }
+    });
+    console.log("Specified tiles removed from the map.");
+  }
+  getCoin(character, tile) {
+    if (this.coins < 7) {
+      this.coins += 1;
+      console.log(this.coins);
+      this.layer.removeTileAt(tile.x, tile.y);
+      console.log("Coin collected, tile removed.");
+    } else {
+      console.log("starting the function next level");
+      this.nextlvl();
+    }
+  }
   loadImageFromLocalStorage1(key) {
     let imgData = localStorage.getItem(key);
     if (imgData) {
@@ -156,23 +217,11 @@ class Level3 extends Phaser.Scene {
     }
     return "assets/character2.png";
   }
-
-  resetCharacter() {
-    this.resetCoins(); // Call to reset the coins on the map
-    this.character.setPosition(100, 500);
-    this.character2.setPosition(1100, 500);
-    console.log("Character reset due to hazard.");
-  }
-
-  getCoin(character, tile) {
-    if (this.coins < 7) {
-      this.coins += 1;
-      console.log(this.coins);
-      this.layer.removeTileAt(tile.x, tile.y);
-      console.log("Coin collected, tile removed.");
-    } else {
-      this.nextlvl();
-    }
+  resetCharacter(character, character2) {
+    character.setPosition(100, 500);
+    character2.setPosition(100, 500);
+    this.resetCoins();
+    console.log("Characters and coins reset due to hazard.");
   }
   resetCoins() {
     this.coinPositions.forEach((pos) => {
@@ -181,40 +230,34 @@ class Level3 extends Phaser.Scene {
     });
     console.log("Coins have been reset on the map.");
   }
-
   nextlvl() {
     this.scene.start("Level4");
   }
   update() {
-    //remaining time
+    this.updateCharacter(this.character, this.cursors);
+    this.updateCharacter(this.character2, this.wasd);
 
-    this.character.setVelocityX(0);
-    if (this.cursors.left.isDown) {
-      console.log("Left");
-      this.character.setVelocityX(-200);
-    } else if (this.cursors.right.isDown) {
-      this.character.setVelocityX(200);
-    }
-    if (this.cursors.up.isDown && this.character.body.blocked.down) {
-      this.sound.play("jumpSound");
-      this.character.setVelocityY(-625);
-    }
-
-    this.character2.setVelocityX(0);
-
-    if (this.wasd.left.isDown) {
-      this.character2.setVelocityX(-200);
-    } else if (this.wasd.right.isDown) {
-      this.character2.setVelocityX(200);
-    }
-
-    if (this.wasd.up.isDown && this.character2.body.blocked.down) {
-      this.sound.play("jumpSound");
-      this.character2.setVelocityY(-625);
+    if (
+      this.character.y <
+      this.cameras.main.scrollY + this.cameras.main.height / 2
+    ) {
+      this.cameras.main.scrollY =
+        this.character.y - this.cameras.main.height / 2;
     }
   }
-  gameOver() {
-    this.scene.start("GameOver");
+
+  updateCharacter(character, controls) {
+    if (controls.left.isDown || controls.right.isDown) {
+      character.setDrag(0);
+      character.setVelocityX(controls.left.isDown ? -200 : 200);
+    } else {
+      character.setDrag(100);
+      character.setVelocityX(0);
+    }
+    if (controls.up.isDown && character.body.blocked.down) {
+      this.sound.play("jumpSound");
+      character.setVelocityY(-625);
+    }
   }
 }
 

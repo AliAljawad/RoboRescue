@@ -15,7 +15,7 @@ class Level4 extends Phaser.Scene {
       "character2",
       this.loadImageFromLocalStorage2("character2")
     );
-    this.load.tilemapCSV("tilemap1", "./assets/level4.csv");
+    this.load.tilemapCSV("tilemap4", "./assets/level4.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
@@ -32,7 +32,7 @@ class Level4 extends Phaser.Scene {
     background.setScrollFactor(0);
 
     this.map = this.make.tilemap({
-      key: "tilemap1",
+      key: "tilemap4",
       tileWidth: 32,
       tileHeight: 32,
     });
@@ -230,7 +230,7 @@ class Level4 extends Phaser.Scene {
     console.log("Coins have been reset on the map.");
   }
   nextlvl() {
-    window.location.href = '../pages/gameEnding.html';
+    window.location.href = "../pages/gameEnding.html";
   }
   update() {
     this.updateCharacter(this.character, this.cursors);

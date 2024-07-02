@@ -128,21 +128,23 @@ class Level1 extends Phaser.Scene {
     if (tile.index === 41 && character === this.character) {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
+      return;
     } else if (tile.index === 26 && character === this.character2) {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
+      return;
     } else if (tile.index === 106) {
       this.resetCharacter(this.character, this.character2);
     }
   }
 
   getCoin(character, tile) {
-    if (this.coins < 5) {
-      this.coins += 1;
-      console.log(this.coins);
-      this.layer.removeTileAt(tile.x, tile.y);
-      console.log("Coin collected, tile removed.");
-    } else {
+    this.sound.play("coinSound");
+    this.coins += 1;
+    console.log("Coin collected:", this.coins);
+    this.layer.removeTileAt(tile.x, tile.y);
+
+    if (this.coins >= 6) {
       this.nextlvl();
     }
   }
@@ -174,6 +176,8 @@ class Level1 extends Phaser.Scene {
     console.log("Coins have been reset on the map.");
   }
   nextlvl() {
+    console.log("next level");
+    this.scene.stop("Level1");
     this.scene.start("Level2");
   }
   update() {
