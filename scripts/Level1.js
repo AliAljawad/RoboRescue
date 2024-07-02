@@ -283,12 +283,7 @@ class Level1 extends Phaser.Scene {
     });
     console.log("Coins have been reset on the map.");
   }
-  resetLaser() {
-    this.laserPositions.forEach((pos) => {
-      this.layer.putTileAt(pos.index, pos.x, pos.y);
-    });
-    console.log("Coins have been reset on the map.");
-  }
+
   nextlvl() {
     this.scene.start("Level2");
   }
