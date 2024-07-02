@@ -60,7 +60,7 @@ function nextPlayer() {
 
 function saveDrawings() {
   saveCanvasToLocalStorage("character2");
-  alert("Characters saved!");
+  window.location.href = '../game.html';
 }
 
 function clearCanvas() {

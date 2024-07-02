@@ -1,0 +1,88 @@
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fall {
+    0% {
+      top: -50px;
+      opacity: 1;
+    }
+    100% {
+      top: 100vh;
+      opacity: 0;
+    }
+  }
+
+  body {
+    background-image: url('../assets/congrats.jpg'); /* Replace with your background image path */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+  }
+
+  .gameover-page {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 1s ease-in-out;
+    z-index: 1;
+  }
+
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: fadeIn 2s ease-in-out;
+  }
+
+  p {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    animation: fadeIn 3s ease-in-out;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .gameover-button {
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    animation: fadeIn 4s ease-in-out;
+  }
+
+  .gameover-button:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+  }
+
+  .emoji {
+    position: absolute;
+    top: -50px;
+    font-size: 2rem;
+    animation: fall 4s linear infinite;
+    z-index: 0;
+  }

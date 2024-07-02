@@ -12,6 +12,7 @@ class Level2 extends Phaser.Scene {
     this.load.tilemapCSV("tilemap2", "./assets/lvl2.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
+    this.coinPositions = [];
   }
 
   create() {
@@ -49,9 +50,9 @@ class Level2 extends Phaser.Scene {
       .setDrag(100)
       .setGravityY(600)
       .setScale(0.25);
-      this.character.setTint(0x0000ff);
+    this.character.setTint(0x0000ff);
 
-      this.character.body.setSize(80, 150)
+    this.character.body.setSize(80, 150);
 
     this.character2 = this.physics.add
       .sprite(1170, 100, "character2")
@@ -61,18 +62,35 @@ class Level2 extends Phaser.Scene {
       .setDrag(100)
       .setGravityY(600)
       .setScale(0.35);
-      this.character2.setTint(0xff0000);   
+    this.character2.setTint(0xff0000);
 
-    this.character2.body.setSize(80, 150)
+    this.character2.body.setSize(80, 150);
 
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
-    this.physics.add.collider(this.character, this.layer, this.handleTileCollision, null, this);
-    this.physics.add.collider(this.character2, this.layer, this.handleTileCollision, null, this);
+    this.physics.add.collider(
+      this.character,
+      this.layer,
+      this.handleTileCollision,
+      null,
+      this
+    );
+    this.physics.add.collider(
+      this.character2,
+      this.layer,
+      this.handleTileCollision,
+      null,
+      this
+    );
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cameras.main.startFollow(this.character, true);
-    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    this.cameras.main.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
 
     this.layer.setDepth(1);
     this.character2.setDepth(2);
@@ -87,36 +105,43 @@ class Level2 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
-      font: "25px Arial",
-      fill: "#000000",
-    });
-    this.textTime.setScrollFactor(0);
-
     this.coinText = this.add.text(1100, 10, "Coins: 0", {
       font: "25px Arial",
       fill: "#000000",
     });
-    this.coinText.setScrollFactor(0);
-
-    this.timedEvent = this.time.addEvent({
-      delay: 99000,
-      callback: this.gameOver,
-      callbackScope: this,
-      loop: false,
+    this.initializeCoins();
+  }
+  initializeCoins() {
+    this.map.forEachTile((tile) => {
+      if (tile.index == 26 || tile.index == 41) {
+        // Assuming these are coin tiles
+        this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
     });
+  }
+  resetCoins() {
+    this.coinPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
+      this.coins = 0;
+    });
+    console.log("Coins have been reset on the map.");
+  }
+  resetCharacter(character, character2) {
+    character.setPosition(50, 500);
+    character2.setPosition(1168, 50);
+    this.resetCoins(); // Call to reset the coins on the map
+    console.log("Characters and coins reset due to hazard.");
   }
 
   handleTileCollision(character, tile) {
-    if (tile.index === 26 && character.texture.key === 'character1') {
+    if (tile.index === 26 && character.texture.key === "character1") {
       this.getCoin(character, tile);
       console.log("Coin collected by character1.");
-    } else if (tile.index === 41 && character.texture.key === 'character2') {
+    } else if (tile.index === 41 && character.texture.key === "character2") {
       this.getCoin(character, tile);
       console.log("Coin collected by character2.");
     } else if (tile.index === 106 || tile.index === 105 || tile.index === 120) {
-      this.character.setPosition(50, 500);
-      this.character2.setPosition(1168,50);
+      this.resetCharacter(this.character, this.character2);
     }
   }
   getCoin(character, tile) {
@@ -132,9 +157,6 @@ class Level2 extends Phaser.Scene {
   }
 
   update() {
-    this.remainingTime = this.timedEvent.getRemainingSeconds();
-    this.textTime.setText(`Remaining Time: ${Math.round(this.remainingTime).toString()}`);
-
     this.character.setVelocityX(0);
     if (this.cursors.left.isDown) {
       this.character.setVelocityX(-200);
@@ -162,19 +184,16 @@ class Level2 extends Phaser.Scene {
     // Check if character falls below the screen
     if (this.character.y > this.physics.world.bounds.height) {
       this.character.setPosition(50, 500);
+      this.character2.setPosition(1168, 50);
     }
 
     if (this.character2.y > this.physics.world.bounds.height) {
-      this.character2.setPosition(1168,50);
+      this.character2.setPosition(1168, 50);
+      this.character.setPosition(50, 500);
     }
   }
-
-  gameOver() {
-    this.scene.start("GameOver");
-  }
-
   nextlvl() {
-    this.scene.start("Level1");
+    this.scene.start("Level3");
   }
 }
 
