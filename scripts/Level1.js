@@ -7,7 +7,8 @@ class Level1 extends Phaser.Scene {
   preload() {
     this.load.image("tileset", "assets/Tiles.png");
     this.load.image("background", "assets/background.png");
-    this.load.image("character1", "assets/character1.png");
+    this.load.image("character1", this.loadImageFromLocalStorage1("character1"));
+    this.load.image("character2", this.loadImageFromLocalStorage2("character2"));
     this.load.tilemapCSV("tilemap1", "assets/lvl1.csv");
 
     // Ensure all assets are loaded before proceeding
