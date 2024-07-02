@@ -1,3 +1,4 @@
+import p5 from 'p5';
 let canvas;
 let drawing = [];
 let currentPath = [];
@@ -96,3 +97,4 @@ function saveCanvasToLocalStorage(key) {
   }
   console.log(`Current localStorage for ${key}: `, localStorage.getItem(key));
 }
+new p5();
