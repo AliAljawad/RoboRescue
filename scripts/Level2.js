@@ -7,8 +7,14 @@ class Level2 extends Phaser.Scene {
   preload() {
     this.load.image("tileset1", "./assets/Tiles.png");
     this.load.image("background", "./assets/background.png");
-    this.load.image("character1", this.loadImageFromLocalStorage1("character1"));
-    this.load.image("character2", this.loadImageFromLocalStorage2("character2"));
+    this.load.image(
+      "character1",
+      this.loadImageFromLocalStorage1("character1")
+    );
+    this.load.image(
+      "character2",
+      this.loadImageFromLocalStorage2("character2")
+    );
     this.load.tilemapCSV("tilemap2", "./assets/lvl2.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
@@ -176,7 +182,8 @@ class Level2 extends Phaser.Scene {
 
   resetCharacterIfNecessary(character, tile) {
     if (
-      (tile.index === 106 || tile.index === 105) ||
+      tile.index === 106 ||
+      tile.index === 105 ||
       ((tile.index === 72 || tile.index === 57) &&
         character === this.character2) ||
       ((tile.index === 71 || tile.index === 56) && character === this.character)
@@ -200,7 +207,7 @@ class Level2 extends Phaser.Scene {
       console.log(this.coins);
       this.layer.removeTileAt(tile.x, tile.y);
       if (this.coinText) {
-        this.coinText.setText('Coins: ' + this.coins); // Update coinText
+        this.coinText.setText("Coins: " + this.coins); // Update coinText
       } else {
         console.error("coinText is not defined!");
       }
@@ -212,10 +219,10 @@ class Level2 extends Phaser.Scene {
 
   createUI() {
     // Create coin text
-    this.coinText = this.add.text(10, 10, 'Coins: 0', {
-      fontFamily: 'Arial',
+    this.coinText = this.add.text(10, 10, "Coins: 0", {
+      fontFamily: "Arial",
       fontSize: 24,
-      color: '#ffffff',
+      color: "#ffffff",
     });
     this.coinText.setScrollFactor(0);
     this.coinText.setDepth(3); // Ensure text is above everything else
@@ -249,7 +256,7 @@ class Level2 extends Phaser.Scene {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
       if (this.coinText) {
-        this.coinText.setText('Coins: ' + this.coins); // Reset coinText
+        this.coinText.setText("Coins: " + this.coins); // Reset coinText
       } else {
         console.error("coinText is not defined!");
       }
@@ -258,7 +265,7 @@ class Level2 extends Phaser.Scene {
   }
 
   nextlvl() {
-    window.location.href = "../pages/gameEnding.html";
+    this.scene.start("Level2");
   }
 
   update() {

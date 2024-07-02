@@ -180,7 +180,8 @@ class Level3 extends Phaser.Scene {
 
   resetCharacterIfNecessary(character, tile) {
     if (
-      (tile.index === 106 || tile.index === 105) ||
+      tile.index === 106 ||
+      tile.index === 105 ||
       ((tile.index === 72 || tile.index === 57) &&
         character === this.character2) ||
       ((tile.index === 71 || tile.index === 56) && character === this.character)
@@ -211,10 +212,10 @@ class Level3 extends Phaser.Scene {
 
   createUI() {
     // Create coin text
-    this.coinText = this.add.text(10, 10, 'Coins: 0', {
-      fontFamily: 'Arial',
+    this.coinText = this.add.text(10, 10, "Coins: 0", {
+      fontFamily: "Arial",
       fontSize: 24,
-      color: '#ffffff',
+      color: "#ffffff",
     });
     this.coinText.setScrollFactor(0);
     this.coinText.setDepth(3); // Ensure text is above everything else
@@ -248,7 +249,7 @@ class Level3 extends Phaser.Scene {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
       if (this.coinText) {
-        this.coinText.setText('Coins: ' + this.coins); // Reset coinText
+        this.coinText.setText("Coins: " + this.coins); // Reset coinText
       } else {
         console.error("coinText is not defined!");
       }
@@ -257,7 +258,7 @@ class Level3 extends Phaser.Scene {
   }
 
   nextlvl() {
-    window.location.href = "../pages/gameEnding.html";
+    this.scene.start("Level4");
   }
 
   update() {
