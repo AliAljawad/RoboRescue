@@ -119,7 +119,6 @@ class Level1 extends Phaser.Scene {
   initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
-        // Assuming these are coin tiles
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
       if (tile.index == 71 || tile.index == 57 || tile.index == 56 || 72) {
@@ -207,24 +206,33 @@ class Level1 extends Phaser.Scene {
     }
   }
 
-  removeTiles(tileIndices) {
-    this.map.forEachTile((tile) => {
-      if (tileIndices.includes(tile.index)) {
-        this.layer.removeTileAt(tile.x, tile.y);
-      }
-    });
-    console.log("Specified tiles removed from the map.");
-  }
   getCoin(character, tile) {
     if (this.coins < 5) {
       this.coins += 1;
-      console.log(this.coins);
-      this.layer.removeTileAt(tile.x, tile.y);
+      console.log("Coins collected:", this.coins);
+      if (this.coinText) {
+        this.coinText.setText("Coins: " + this.coins); // Update coinText
+      } else {
+        console.error("coinText is not defined!");
+      }
       console.log("Coin collected, tile removed.");
+      this.layer.removeTileAt(tile.x, tile.y);
     } else {
       this.nextlvl();
     }
   }
+
+  createUI() {
+    // Create coin text
+    this.coinText = this.add.text(10, 10, "Coins: 0", {
+      fontFamily: "Arial",
+      fontSize: 24,
+      color: "#ffffff",
+    });
+    this.coinText.setScrollFactor(0);
+    this.coinText.setDepth(3); // Ensure text is above everything else
+  }
+
   loadImageFromLocalStorage1(key) {
     let imgData = localStorage.getItem(key);
     if (imgData) {
@@ -232,6 +240,7 @@ class Level1 extends Phaser.Scene {
     }
     return "assets/character1.png";
   }
+
   loadImageFromLocalStorage2(key) {
     let imgData = localStorage.getItem(key);
     if (imgData) {
@@ -239,6 +248,7 @@ class Level1 extends Phaser.Scene {
     }
     return "assets/character2.png";
   }
+
   resetCharacter(character, character2) {
     character.setPosition(100, 500);
     character2.setPosition(100, 500);
@@ -246,10 +256,22 @@ class Level1 extends Phaser.Scene {
     this.resetLaser();
     console.log("Characters and coins reset due to hazard.");
   }
+
   resetCoins() {
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
+      if (this.coinText) {
+        this.coinText.setText("Coins: " + this.coins); // Reset coinText
+      } else {
+        console.error("coinText is not defined!");
+      }
+    });
+    console.log("Coins have been reset on the map.");
+  }
+  resetLaser() {
+    this.laserPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
     });
     console.log("Coins have been reset on the map.");
   }
@@ -260,10 +282,9 @@ class Level1 extends Phaser.Scene {
     console.log("Coins have been reset on the map.");
   }
   nextlvl() {
-    console.log("next level");
-    this.scene.stop("Level1");
-    this.scene.start("Level2");
+    window.location.href = "../pages/gameEnding.html";
   }
+
   update() {
     this.updateCharacter(this.character, this.cursors);
     this.updateCharacter(this.character2, this.wasd);
@@ -280,8 +301,11 @@ class Level1 extends Phaser.Scene {
   updateCharacter(character, controls) {
     if (controls.left.isDown || controls.right.isDown) {
       character.setDrag(0);
+      character.setDrag(0);
       character.setVelocityX(controls.left.isDown ? -200 : 200);
     } else {
+      character.setDrag(100);
+      character.setVelocityX(0);
       character.setDrag(100);
       character.setVelocityX(0);
     }

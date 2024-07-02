@@ -112,8 +112,11 @@ class Level3 extends Phaser.Scene {
     this.character2.setDepth(2);
 
     this.character.setDebug(true, true, 0xff0000);
+
     this.initializeCoins();
+    this.createUI(); // Call createUI to set up UI elements
   }
+
   initializeCoins() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
@@ -121,6 +124,7 @@ class Level3 extends Phaser.Scene {
       }
     });
   }
+
   handleTileCollision(character, tile, phasingTiles) {
     if (phasingTiles.includes(tile.index)) {
       this.teleportCharacter(character, tile, phasingTiles);
@@ -173,9 +177,10 @@ class Level3 extends Phaser.Scene {
       tile.setCollision(false);
     }
   }
+
   resetCharacterIfNecessary(character, tile) {
     if (
-      tile.index === 106 ||
+      (tile.index === 106 || tile.index === 105) ||
       ((tile.index === 72 || tile.index === 57) &&
         character === this.character2) ||
       ((tile.index === 71 || tile.index === 56) && character === this.character)
@@ -192,17 +197,29 @@ class Level3 extends Phaser.Scene {
     });
     console.log("Specified tiles removed from the map.");
   }
+
   getCoin(character, tile) {
-    if (this.coins < 7) {
+    if (this.coins < 5) {
       this.coins += 1;
       console.log(this.coins);
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
     } else {
-      console.log("starting the function next level");
       this.nextlvl();
     }
   }
+
+  createUI() {
+    // Create coin text
+    this.coinText = this.add.text(10, 10, 'Coins: 0', {
+      fontFamily: 'Arial',
+      fontSize: 24,
+      color: '#ffffff',
+    });
+    this.coinText.setScrollFactor(0);
+    this.coinText.setDepth(3); // Ensure text is above everything else
+  }
+
   loadImageFromLocalStorage1(key) {
     let imgData = localStorage.getItem(key);
     if (imgData) {
@@ -210,6 +227,7 @@ class Level3 extends Phaser.Scene {
     }
     return "assets/character1.png";
   }
+
   loadImageFromLocalStorage2(key) {
     let imgData = localStorage.getItem(key);
     if (imgData) {
@@ -217,22 +235,31 @@ class Level3 extends Phaser.Scene {
     }
     return "assets/character2.png";
   }
+
   resetCharacter(character, character2) {
     character.setPosition(100, 500);
     character2.setPosition(100, 500);
     this.resetCoins();
     console.log("Characters and coins reset due to hazard.");
   }
+
   resetCoins() {
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
+      if (this.coinText) {
+        this.coinText.setText('Coins: ' + this.coins); // Reset coinText
+      } else {
+        console.error("coinText is not defined!");
+      }
     });
     console.log("Coins have been reset on the map.");
   }
+
   nextlvl() {
-    this.scene.start("Level4");
+    window.location.href = "../pages/gameEnding.html";
   }
+
   update() {
     this.updateCharacter(this.character, this.cursors);
     this.updateCharacter(this.character2, this.wasd);
