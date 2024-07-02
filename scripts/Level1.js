@@ -5,20 +5,19 @@ class Level1 extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("tileset", "./assets/Tiles.png");
-    this.load.image("background", "./assets/background.png");
-    this.load.image(
-      "character1",
-      this.loadImageFromLocalStorage1("character1")
-    );
-    this.load.image(
-      "character2",
-      this.loadImageFromLocalStorage2("character2")
-    );
-    this.load.tilemapCSV("tilemap1", "./assets/lvl1.csv");
-    this.load.audio("coinSound", "./assets/coinSound.mp3");
-    this.load.audio("jumpSound", "./assets/jumpSound.mp3");
-    this.coinPositions = [];
+    this.load.image("tileset", "assets/Tiles.png");
+    this.load.image("background", "assets/background.png");
+    this.load.image("character1", "assets/character1.png");
+    this.load.tilemapCSV("tilemap1", "assets/lvl1.csv");
+
+    // Ensure all assets are loaded before proceeding
+    this.load.on('complete', () => {
+      console.log('Assets loaded');
+    });
+
+    this.load.on('error', (file) => {
+      console.error(`Failed to load: ${file.key}`);
+    });
   }
 
   create() {
