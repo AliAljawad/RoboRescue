@@ -127,6 +127,14 @@ class Level1 extends Phaser.Scene {
       }
     });
   }
+  removeTiles(tileIndices) {
+    this.map.forEachTile((tile) => {
+      if (tileIndices.includes(tile.index)) {
+        this.layer.removeTileAt(tile.x, tile.y);
+      }
+    });
+    console.log("Specified tiles removed from the map.");
+  }
   handleTileCollision(character, tile, phasingTiles) {
     if (phasingTiles.includes(tile.index)) {
       this.teleportCharacter(character, tile, phasingTiles);
@@ -282,7 +290,7 @@ class Level1 extends Phaser.Scene {
     console.log("Coins have been reset on the map.");
   }
   nextlvl() {
-    window.location.href = "../pages/gameEnding.html";
+    this.scene.start("Level2");
   }
 
   update() {
