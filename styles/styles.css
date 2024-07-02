@@ -7,14 +7,17 @@ html {
   justify-content: center;
   align-items: center;
   background-color: #282c34;
+  font-family: Arial, sans-serif; /* Example font */
 }
 
 #gameContainer {
-  width: 1200px;
-  height: 600px;
+  width: 100vw;
+  height: 100vh;
+  max-width: 1200px;
+  max-height: 800px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto;
+  position: relative;
 }
