@@ -5,8 +5,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
-        characterDesign: "./pages/characterDesign.html", 
-        p5:"./p5/p5.js"
+        characterDesign: "./pages/characterDesign.html",
       },
       output: {
         assetFileNames: "assets/[name].[ext]",
