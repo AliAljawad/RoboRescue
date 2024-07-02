@@ -241,7 +241,7 @@ class Level4 extends Phaser.Scene {
       this.cameras.main.scrollY + this.cameras.main.height / 2
     ) {
       this.cameras.main.scrollY =
-        this.character.y - this.cameras.main.height / 2;
+        this.character.y - this.cameras.main.height / 4;
     }
   }
 

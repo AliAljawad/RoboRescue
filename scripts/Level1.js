@@ -19,7 +19,7 @@ class Level1 extends Phaser.Scene {
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
-
+    this.laserPositions = [];
     // Example of initializing coins -- you'll adjust this based on your actual coin setup
   }
 
@@ -76,19 +76,19 @@ class Level1 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
+    this.layer.setCollisionByExclusion([-1, 0]);
 
     this.physics.add.collider(
       this.character,
       this.layer,
-      this.handleTileCollision,
+      (character, tile) => this.handleTileCollision(character, tile, [72, 57]),
       null,
       this
     );
     this.physics.add.collider(
       this.character2,
       this.layer,
-      this.handleTileCollision,
+      (character, tile) => this.handleTileCollision(character, tile, [71, 56]),
       null,
       this
     );
@@ -114,37 +114,114 @@ class Level1 extends Phaser.Scene {
     this.character2.setDepth(2);
 
     this.character.setDebug(true, true, 0xff0000);
-    this.initializeCoins();
+    this.initializeCoinsandLasers();
   }
-  initializeCoins() {
+  initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
         // Assuming these are coin tiles
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
+      if (tile.index == 71 || tile.index == 57 || tile.index == 56 || 72) {
+        // Assuming these are coin tiles
+        this.laserPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
     });
   }
-  handleTileCollision(character, tile) {
+  handleTileCollision(character, tile, phasingTiles) {
+    if (phasingTiles.includes(tile.index)) {
+      this.teleportCharacter(character, tile, phasingTiles);
+      console.log("Phasing through tile");
+      return;
+    }
+
+    if (tile.index === 101 && character === this.character) {
+      this.removeTiles([72, 57]);
+      this.disableTileCollision(tile);
+      console.log(
+        "Tile 101 touched by character1, specified tiles removed and collision disabled."
+      );
+    }
+
+    if (tile.index === 86 && character === this.character2) {
+      this.removeTiles([71, 56]);
+      this.disableTileCollision(tile);
+      console.log(
+        "Tile 86 touched by character2, specified tiles removed and collision disabled."
+      );
+    }
+
+    this.normalTileCollision(character, tile, phasingTiles);
+  }
+  teleportCharacter(character, tile, phasingTiles) {
+    if (phasingTiles.includes(tile.index)) {
+      let teleportDistance;
+
+      // Determine the base X position of the tile the character is currently on
+      let baseX = tile.x * tile.width;
+
+      // Determine the direction and set teleport distance
+      let direction = character.body.velocity.x > 0 ? -0.5 : 3;
+      teleportDistance = direction * 1 * tile.width; // Directly calculate teleport distance in pixels
+
+      // Calculate new x position from the baseX position of the tile
+      let newX = baseX + teleportDistance;
+      character.x = newX;
+
+      // Diagnostic logs to trace values
+      console.log("Teleporting", character.name);
+      console.log("Velocity X:", character.body.velocity.x);
+      console.log("Current Tile X:", tile.x);
+      console.log("Base X Position:", baseX);
+      console.log("Teleport Distance:", teleportDistance);
+      console.log("Tile Width:", tile.width);
+      console.log("New X Calculated:", newX);
+      console.log("Direction:", direction === -1 ? "Left" : "Right");
+      console.log("Actual New X Set:", character.x);
+    }
+  }
+
+  normalTileCollision(character, tile) {
     if (tile.index === 41 && character === this.character) {
       this.getCoin(character, tile);
-      console.log("Coin collected or hazard encountered.");
-      return;
     } else if (tile.index === 26 && character === this.character2) {
       this.getCoin(character, tile);
-      console.log("Coin collected or hazard encountered.");
-      return;
-    } else if (tile.index === 106) {
+    } else {
+      this.resetCharacterIfNecessary(character, tile);
+    }
+  }
+
+  disableTileCollision(tile) {
+    if (tile) {
+      tile.setCollision(false);
+    }
+  }
+  resetCharacterIfNecessary(character, tile) {
+    if (
+      tile.index === 106 ||
+      ((tile.index === 72 || tile.index === 57) &&
+        character === this.character2) ||
+      ((tile.index === 71 || tile.index === 56) && character === this.character)
+    ) {
       this.resetCharacter(this.character, this.character2);
     }
   }
 
+  removeTiles(tileIndices) {
+    this.map.forEachTile((tile) => {
+      if (tileIndices.includes(tile.index)) {
+        this.layer.removeTileAt(tile.x, tile.y);
+      }
+    });
+    console.log("Specified tiles removed from the map.");
+  }
   getCoin(character, tile) {
-    this.sound.play("coinSound");
-    this.coins += 1;
-    console.log("Coin collected:", this.coins);
-    this.layer.removeTileAt(tile.x, tile.y);
-
-    if (this.coins >= 6) {
+    if (this.coins < 5) {
+      this.coins += 1;
+      console.log(this.coins);
+      this.layer.removeTileAt(tile.x, tile.y);
+      console.log("Coin collected, tile removed.");
+    } else {
       this.nextlvl();
     }
   }
@@ -165,13 +242,20 @@ class Level1 extends Phaser.Scene {
   resetCharacter(character, character2) {
     character.setPosition(100, 500);
     character2.setPosition(100, 500);
-    this.resetCoins(); // Call to reset the coins on the map
+    this.resetCoins();
+    this.resetLaser();
     console.log("Characters and coins reset due to hazard.");
   }
   resetCoins() {
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
+    });
+    console.log("Coins have been reset on the map.");
+  }
+  resetLaser() {
+    this.laserPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
     });
     console.log("Coins have been reset on the map.");
   }
@@ -184,23 +268,22 @@ class Level1 extends Phaser.Scene {
     this.updateCharacter(this.character, this.cursors);
     this.updateCharacter(this.character2, this.wasd);
 
-    // Manually adjust camera position based on character's Y position
     if (
       this.character.y <
       this.cameras.main.scrollY + this.cameras.main.height / 2
     ) {
       this.cameras.main.scrollY =
-        this.character.y - this.cameras.main.height / 2;
+        this.character.y - this.cameras.main.height / 4;
     }
   }
 
   updateCharacter(character, controls) {
     if (controls.left.isDown || controls.right.isDown) {
-      character.setDrag(0); // No drag when moving
+      character.setDrag(0);
       character.setVelocityX(controls.left.isDown ? -200 : 200);
     } else {
-      character.setDrag(100); // Apply drag to stop more abruptly when no keys are pressed
-      character.setVelocityX(0); // Reset horizontal velocity to stop sliding
+      character.setDrag(100);
+      character.setVelocityX(0);
     }
     if (controls.up.isDown && character.body.blocked.down) {
       this.sound.play("jumpSound");
