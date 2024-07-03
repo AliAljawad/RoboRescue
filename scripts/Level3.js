@@ -113,7 +113,6 @@ class Level3 extends Phaser.Scene {
     this.layer.setDepth(1);
     this.character.setDepth(2);
     this.character2.setDepth(2);
-    this.character.setDebug(true, true, 0xff0000);
 
     this.initializeCoinsandLasers();
     this.createUI();
