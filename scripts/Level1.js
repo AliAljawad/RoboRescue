@@ -15,7 +15,7 @@ class Level1 extends Phaser.Scene {
       "character2",
       this.loadImageFromLocalStorage2("character2")
     );
-    this.load.tilemapCSV("tilemap1", "./assets/lvl1.csv");
+    this.load.tilemapCSV("tilemap1", "./assets/Lvl1.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
