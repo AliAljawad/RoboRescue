@@ -19,6 +19,7 @@ class Level3 extends Phaser.Scene {
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
+    this.laserPositions = [];
   }
 
   create() {
@@ -58,7 +59,7 @@ class Level3 extends Phaser.Scene {
     this.character.setScale(0.5);
 
     this.character2 = this.physics.add
-      .sprite(1100, 600, "character2")
+      .sprite(100, 600, "character2")
       .setOrigin(0.5, 0)
       .setCollideWorldBounds(true)
       .setBounce(0.2)
@@ -74,25 +75,12 @@ class Level3 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-    /// timer top left corner
-    this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
-      font: "25px Arial",
-      fill: "#000000",
-    });
-    this.textTime.setScrollFactor(0);
-
-    this.coinText = this.add.text(1100, 10, "Coins: 0", {
-      font: "25px Arial",
-      fill: "#000000",
-    });
-    this.coinText.setScrollFactor(0);
-
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
     this.physics.add.collider(
       this.character,
       this.layer,
-      this.handleTileCollision,
+      (character, tile) => this.handleTileCollision(character, tile, [72, 57]),
       null,
       this
     );
@@ -100,7 +88,7 @@ class Level3 extends Phaser.Scene {
     this.physics.add.collider(
       this.character2,
       this.layer,
-      this.handleTileCollision,
+      (character, tile) => this.handleTileCollision(character, tile, [71, 56]),
       null,
       this
     );
@@ -127,16 +115,21 @@ class Level3 extends Phaser.Scene {
     this.character2.setDepth(2);
     this.character.setDebug(true, true, 0xff0000);
 
-    this.initializeCoins();
+    this.initializeCoinsandLasers();
   }
 
-  initializeCoins() {
+  initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
+      if (tile.index == 71 || tile.index == 57 || tile.index == 56 || 72) {
+
+        this.laserPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
     });
   }
+
   disableTileCollision(tile) {
     if (tile) {
       tile.setCollision(false);
@@ -151,7 +144,23 @@ class Level3 extends Phaser.Scene {
     console.log("Specified tiles removed from the map.");
   }
 
-  handleTileCollision(character, tile) {
+  teleportCharacter(character, tile, phasingTiles) {
+    if (phasingTiles.includes(tile.index)) {
+      if (character.body.velocity.x > 0) {
+        character.x = (tile.x - 2) * tile.width;
+      } else if (character.body.velocity.x < 0) {
+        character.x = (tile.x + 2) * tile.width;
+      }
+      console.log("Phasing through tile");
+    }
+  }
+  handleTileCollision(character, tile,phasingTiles) {
+
+    if (phasingTiles.includes(tile.index)) {
+      this.teleportCharacter(character, tile, phasingTiles);
+      console.log("Phasing through tile");
+      return;
+    }
     // 26 is tile id for chr 2 ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) )
     if (
       (tile.index === 26 && character == this.character2) ||
@@ -211,10 +220,19 @@ class Level3 extends Phaser.Scene {
     return "assets/character2.png";
   }
 
+  resetLaser() {
+    this.laserPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
+    });
+    console.log("Coins have been reset on the map.");
+  }
+
   resetCharacter() {
     this.resetCoins(); // Call to reset the coins on the map
     this.character.setPosition(100, 600);
-    this.character2.setPosition(1100, 600);
+    this.character2.setPosition(100, 600);
+    this.resetLaser()
+
     console.log("Character reset due to hazard.");
   }
 
@@ -223,7 +241,6 @@ class Level3 extends Phaser.Scene {
     if (this.coins < 7) {
       this.sound.play("coinSound");
       this.coins += 1;
-      this.coinText.setText(`Coins: ${this.coins}`);
       console.log(this.coins);
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
@@ -232,7 +249,6 @@ class Level3 extends Phaser.Scene {
     }
   }
   resetCoins() {
-    this.coinText.setText(`Coins: 0`);
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
