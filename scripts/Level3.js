@@ -74,7 +74,6 @@ class Level3 extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
-<<<<<<< HEAD
     /// timer top left corner
     this.textTime = this.add.text(10, 10, "Remaining Time: 00", {
       font: "25px Arial",
@@ -82,15 +81,12 @@ class Level3 extends Phaser.Scene {
     });
     this.textTime.setScrollFactor(0);
 
-
     this.coinText = this.add.text(1100, 10, "Coins: 0", {
       font: "25px Arial",
       fill: "#000000",
     });
     this.coinText.setScrollFactor(0);
 
-=======
->>>>>>> development
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
 
     this.physics.add.collider(
@@ -141,6 +137,19 @@ class Level3 extends Phaser.Scene {
       }
     });
   }
+  disableTileCollision(tile) {
+    if (tile) {
+      tile.setCollision(false);
+    }
+  }
+  removeTiles(tileIndices) {
+    this.map.forEachTile((tile) => {
+      if (tileIndices.includes(tile.index)) {
+        this.layer.removeTileAt(tile.x, tile.y);
+      }
+    });
+    console.log("Specified tiles removed from the map.");
+  }
 
   handleTileCollision(character, tile) {
     // 26 is tile id for chr 2 ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) )
@@ -156,8 +165,36 @@ class Level3 extends Phaser.Scene {
       if (character.body.blocked.down) {
         this.resetCharacter();
       }
+    } else if (tile.index === 101 && character === this.character) {
+      this.removeTiles([72, 57]); // the red lazer tiles id
+      this.disableTileCollision(tile);
+      console.log(
+        "Tile 101 touched by character1, specified tiles removed and collision disabled."
+      );
+    } else if (tile.index === 86 && character === this.character2) {
+      this.removeTiles([71, 56]); // the blue lazer tiles id
+      tile.setCollision(false);
+      console.log(
+        "Tile 86 touched by character2, specified tiles removed and collision disabled."
+      );
+    }else if((tile.index === 72 || tile.index === 57) && character === this.character2){
+      this.resetCharacter(this.character, this.character2);
+    }else if ((tile.index === 71 || tile.index === 56) && character === this.character){
+      this.resetCharacter(this.character, this.character2);
     }
+
   }
+
+  // resetCharacterIfNecessary(character, tile) {
+  //   if (
+  //     tile.index === 106 ||
+  //     ((tile.index === 72 || tile.index === 57) &&
+  //       character === this.character2) ||
+  //     ((tile.index === 71 || tile.index === 56) && character === this.character)
+  //   ) {
+  //     this.resetCharacter(this.character, this.character2);
+  //   }
+  // }
 
   loadImageFromLocalStorage1(key) {
     let imgData = localStorage.getItem(key);
@@ -180,6 +217,7 @@ class Level3 extends Phaser.Scene {
     this.character2.setPosition(1100, 600);
     console.log("Character reset due to hazard.");
   }
+
 
   getCoin(character, tile) {
     if (this.coins < 7) {
