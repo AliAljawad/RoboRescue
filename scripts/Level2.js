@@ -292,7 +292,6 @@ class Level2 extends Phaser.Scene {
         this.character.y - this.cameras.main.height / 2;
     }
 
-    // Check if the characters have fallen below the tilemap
     if (this.character.y > this.map.heightInPixels) {
       this.resetCharacter(this.character, this.character2);
     }
