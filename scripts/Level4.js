@@ -15,10 +15,11 @@ class Level4 extends Phaser.Scene {
       "character2",
       this.loadImageFromLocalStorage2("character2")
     );
-    this.load.tilemapCSV("tilemap1", "./assets/level4.csv");
+    this.load.tilemapCSV("tilemap4", "./assets/level4.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
+    this.laserPositions = [];
   }
 
   create() {
@@ -32,7 +33,7 @@ class Level4 extends Phaser.Scene {
     background.setScrollFactor(0);
 
     this.map = this.make.tilemap({
-      key: "tilemap1",
+      key: "tilemap4",
       tileWidth: 32,
       tileHeight: 32,
     });
@@ -112,15 +113,20 @@ class Level4 extends Phaser.Scene {
     this.character2.setDepth(2);
 
     this.character.setDebug(true, true, 0xff0000);
-    this.initializeCoins();
+    this.initializeCoinsandLasers();
   }
-  initializeCoins() {
+  initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
+      if (tile.index == 71 || tile.index == 57 || tile.index == 56 || 72) {
+        // Assuming these are coin tiles
+        this.laserPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
     });
   }
+
   handleTileCollision(character, tile, phasingTiles) {
     if (phasingTiles.includes(tile.index)) {
       this.teleportCharacter(character, tile, phasingTiles);
@@ -220,6 +226,8 @@ class Level4 extends Phaser.Scene {
     character.setPosition(100, 500);
     character2.setPosition(100, 500);
     this.resetCoins();
+    this.resetLaser();
+
     console.log("Characters and coins reset due to hazard.");
   }
   resetCoins() {
@@ -229,8 +237,14 @@ class Level4 extends Phaser.Scene {
     });
     console.log("Coins have been reset on the map.");
   }
+  resetLaser() {
+    this.laserPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
+    });
+    console.log("Coins have been reset on the map.");
+  }
   nextlvl() {
-    window.location.href = '../pages/gameEnding.html';
+    window.location.href = "../pages/gameEnding.html";
   }
   update() {
     this.updateCharacter(this.character, this.cursors);
@@ -241,7 +255,7 @@ class Level4 extends Phaser.Scene {
       this.cameras.main.scrollY + this.cameras.main.height / 2
     ) {
       this.cameras.main.scrollY =
-        this.character.y - this.cameras.main.height / 2;
+        this.character.y - this.cameras.main.height / 4;
     }
   }
 
