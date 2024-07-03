@@ -19,6 +19,7 @@ class Level2 extends Phaser.Scene {
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
+    this.laserPositions = [];
   }
 
   create() {
@@ -115,14 +116,18 @@ class Level2 extends Phaser.Scene {
 
     this.character.setDebug(true, true, 0xff0000);
 
-    this.initializeCoins();
+    this.initializeCoinsandLasers();
     this.createUI(); // Call createUI to set up UI elements
   }
 
-  initializeCoins() {
+  initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
+      }
+      if (tile.index == 71 || tile.index == 57 || tile.index == 56 || 72) {
+        // Assuming these are coin tiles
+        this.laserPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
     });
   }
@@ -248,22 +253,22 @@ class Level2 extends Phaser.Scene {
     character.setPosition(40, 500);
     character2.setPosition(1170, 100);
     this.resetCoins();
+    this.resetLaser();
     console.log("Characters and coins reset due to hazard.");
   }
-
   resetCoins() {
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
-      if (this.coinText) {
-        this.coinText.setText("Coins: " + this.coins); // Reset coinText
-      } else {
-        console.error("coinText is not defined!");
-      }
     });
     console.log("Coins have been reset on the map.");
   }
-
+  resetLaser() {
+    this.laserPositions.forEach((pos) => {
+      this.layer.putTileAt(pos.index, pos.x, pos.y);
+    });
+    console.log("Coins have been reset on the map.");
+  }
   nextlvl() {
     this.scene.start("Level2");
   }
