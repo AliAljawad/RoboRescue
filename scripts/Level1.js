@@ -15,12 +15,11 @@ class Level1 extends Phaser.Scene {
       "character2",
       this.loadImageFromLocalStorage2("character2")
     );
-    this.load.tilemapCSV("tilemap1", "./assets/lvl1.csv");
+    this.load.tilemapCSV("tilemap1", "./assets/Lvl1.csv");
     this.load.audio("coinSound", "./assets/coinSound.mp3");
     this.load.audio("jumpSound", "./assets/jumpSound.mp3");
     this.coinPositions = [];
     this.laserPositions = [];
-    // Example of initializing coins -- you'll adjust this based on your actual coin setup
   }
 
   create() {
@@ -115,6 +114,7 @@ class Level1 extends Phaser.Scene {
 
     this.character.setDebug(true, true, 0xff0000);
     this.initializeCoinsandLasers();
+    this.createUI();
   }
   initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
@@ -213,26 +213,10 @@ class Level1 extends Phaser.Scene {
       this.resetCharacter(this.character, this.character2);
     }
   }
-
-  getCoin(character, tile) {
-    if (this.coins < 5) {
-      this.coins += 1;
-      console.log("Coins collected:", this.coins);
-      if (this.coinText) {
-        this.coinText.setText("Coins: " + this.coins); // Update coinText
-      } else {
-        console.error("coinText is not defined!");
-      }
-      console.log("Coin collected, tile removed.");
-      this.layer.removeTileAt(tile.x, tile.y);
-    } else {
-      this.nextlvl();
-    }
-  }
-
+  
   createUI() {
     // Create coin text
-    this.coinText = this.add.text(10, 10, "Coins: 0", {
+    this.coinText = this.add.text(10, 10, `Coins: ${this.coins}`, {
       fontFamily: "Arial",
       fontSize: 24,
       color: "#ffffff",
@@ -240,6 +224,21 @@ class Level1 extends Phaser.Scene {
     this.coinText.setScrollFactor(0);
     this.coinText.setDepth(3); // Ensure text is above everything else
   }
+  
+  getCoin(character, tile) {
+    if (this.coins < 5) {
+      this.coins += 1;
+      this.sound.play("coinSound");
+      console.log(this.coins);
+      this.layer.removeTileAt(tile.x, tile.y);
+      console.log("Coin collected, tile removed.");
+      this.coinText.setText(`Coins: ${this.coins}`);  // Update the coin text
+    } else {
+      this.nextlvl();
+    }
+  }
+
+
 
   loadImageFromLocalStorage1(key) {
     let imgData = localStorage.getItem(key);

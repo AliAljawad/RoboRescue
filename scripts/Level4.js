@@ -114,6 +114,7 @@ class Level4 extends Phaser.Scene {
 
     this.character.setDebug(true, true, 0xff0000);
     this.initializeCoinsandLasers();
+    this.createUI();
   }
   initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
@@ -198,16 +199,30 @@ class Level4 extends Phaser.Scene {
     });
     console.log("Specified tiles removed from the map.");
   }
+  createUI() {
+    // Create coin text
+    this.coinText = this.add.text(10, 10, `Coins: ${this.coins}`, {
+      fontFamily: "Arial",
+      fontSize: 24,
+      color: "#ffffff",
+    });
+    this.coinText.setScrollFactor(0);
+    this.coinText.setDepth(3); // Ensure text is above everything else
+  }
+  
   getCoin(character, tile) {
     if (this.coins < 5) {
       this.coins += 1;
+      this.sound.play("coinSound");
       console.log(this.coins);
       this.layer.removeTileAt(tile.x, tile.y);
       console.log("Coin collected, tile removed.");
+      this.coinText.setText(`Coins: ${this.coins}`);  // Update the coin text
     } else {
       this.nextlvl();
     }
   }
+  
   loadImageFromLocalStorage1(key) {
     let imgData = localStorage.getItem(key);
     if (imgData) {
@@ -234,6 +249,11 @@ class Level4 extends Phaser.Scene {
     this.coinPositions.forEach((pos) => {
       this.layer.putTileAt(pos.index, pos.x, pos.y);
       this.coins = 0;
+      if (this.coinText) {
+        this.coinText.setText("Coins: " + this.coins); // Reset coinText
+      } else {
+        console.error("coinText is not defined!");
+      }
     });
     console.log("Coins have been reset on the map.");
   }
