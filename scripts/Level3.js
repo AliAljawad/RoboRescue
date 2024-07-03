@@ -76,6 +76,7 @@ class Level3 extends Phaser.Scene {
     });
 
     this.layer.setCollisionByExclusion([-1, 0]); // Assuming indices -1 and 0 are non-colliding
+    // Sets collision on all tiles in the given layer, except for tiles that have an index specified in the given array.
 
     this.physics.add.collider(
       this.character,
@@ -110,10 +111,10 @@ class Level3 extends Phaser.Scene {
       this.map.heightInPixels
     );
 
-    this.layer.setDepth(1);
-    this.character.setDepth(2);
-    this.character2.setDepth(2);
-    this.character.setDebug(true, true, 0xff0000);
+    // this.layer.setDepth(2);
+    // this.character.setDepth(2);
+    // this.character2.setDepth(2);
+    // this.character.setDebug(true, true, 0xff0000);
 
     this.initializeCoinsandLasers();
   }
@@ -121,20 +122,16 @@ class Level3 extends Phaser.Scene {
   initializeCoinsandLasers() {
     this.map.forEachTile((tile) => {
       if (tile.index == 26 || tile.index == 41) {
+        // coins
         this.coinPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
       if (tile.index == 71 || tile.index == 57 || tile.index == 56 || 72) {
-
+        // lazer id
         this.laserPositions.push({ x: tile.x, y: tile.y, index: tile.index });
       }
     });
   }
 
-  disableTileCollision(tile) {
-    if (tile) {
-      tile.setCollision(false);
-    }
-  }
   removeTiles(tileIndices) {
     this.map.forEachTile((tile) => {
       if (tileIndices.includes(tile.index)) {
@@ -144,23 +141,8 @@ class Level3 extends Phaser.Scene {
     console.log("Specified tiles removed from the map.");
   }
 
-  teleportCharacter(character, tile, phasingTiles) {
-    if (phasingTiles.includes(tile.index)) {
-      if (character.body.velocity.x > 0) {
-        character.x = (tile.x - 2) * tile.width;
-      } else if (character.body.velocity.x < 0) {
-        character.x = (tile.x + 2) * tile.width;
-      }
-      console.log("Phasing through tile");
-    }
-  }
   handleTileCollision(character, tile,phasingTiles) {
 
-    if (phasingTiles.includes(tile.index)) {
-      this.teleportCharacter(character, tile, phasingTiles);
-      console.log("Phasing through tile");
-      return;
-    }
     // 26 is tile id for chr 2 ( (tile.index === 26 && character == this.character2) || (tile.index === 41 && character == this.character) )
     if (
       (tile.index === 26 && character == this.character2) ||
@@ -169,6 +151,7 @@ class Level3 extends Phaser.Scene {
       this.getCoin(character, tile);
       console.log("Coin collected or hazard encountered.");
     } else if (tile.index === 105 || tile.index === 106) {
+      // iron fence
       console.log(character.body.blocked.down);
       console.log(character == this.character2);
       if (character.body.blocked.down) {
@@ -176,7 +159,7 @@ class Level3 extends Phaser.Scene {
       }
     } else if (tile.index === 101 && character === this.character) {
       this.removeTiles([72, 57]); // the red lazer tiles id
-      this.disableTileCollision(tile);
+      tile.setCollision(false);
       console.log(
         "Tile 101 touched by character1, specified tiles removed and collision disabled."
       );
@@ -186,6 +169,7 @@ class Level3 extends Phaser.Scene {
       console.log(
         "Tile 86 touched by character2, specified tiles removed and collision disabled."
       );
+      // 52 and 72 are the red
     }else if((tile.index === 72 || tile.index === 57) && character === this.character2){
       this.resetCharacter(this.character, this.character2);
     }else if ((tile.index === 71 || tile.index === 56) && character === this.character){
