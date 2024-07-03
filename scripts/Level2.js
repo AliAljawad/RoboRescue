@@ -277,7 +277,7 @@ class Level2 extends Phaser.Scene {
     console.log("Coins have been reset on the map.");
   }
   nextlvl() {
-    this.scene.start("Level2");
+    this.scene.start("Level3");
   }
 
   update() {
